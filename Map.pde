@@ -1,4 +1,4 @@
-import java.util.Stack; //<>//
+import java.util.Stack; //<>// //<>//
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Comparator;
@@ -15,6 +15,14 @@ public class Map {
 
   void generate() {
     initMap();
+    for (int i = 0; i < 10; i++) {
+      step();
+    }
+    mapMasses();
+    while (masses.size()>1) {
+      mergeMasses();
+    }
+    clearMasses();
   }
 
   void step() {
@@ -162,7 +170,7 @@ public class Map {
         }
       }
       for (int i = 0; i < masses.size(); i++) {
-        println ("CONNECT CALLED");
+        //  println ("CONNECT CALLED: " + i);
         if (i != mainMassIndex) {
           connectMasses(masses.get(i), masses.get(mainMassIndex));
         }
@@ -195,17 +203,19 @@ public class Map {
         }
       }
     }
+    Collections.sort(neighbours, new CustomComparator());
     boolean path = false;
     String current = "";
     while (!neighbours.isEmpty() && !path) {
       Collections.sort(neighbours, new CustomComparator());
       current = neighbours.get(0);
+      neighbours.remove(0);
       explored.add(current);
       int currentX = Integer.parseInt(current.split("-")[0]);
       int currentY = Integer.parseInt(current.split("-")[1]);
       for (int xMod = -1; xMod < 2; xMod++) {
         for (int yMod = -1; yMod < 2; yMod++) {
-          if (!(xMod == 0 && yMod == 0) && (xMod == 0 || yMod == 0)) {
+          if (!(xMod == 0 && yMod == 0)) {
             int neighbourX = currentX+xMod;
             int neighbourY = currentY+yMod;
             String neighbourString = Integer.toString(neighbourX) +"-"+ Integer.toString(neighbourY);
@@ -215,7 +225,7 @@ public class Map {
                 parentMap.put(neighbourString, current);
               } else {
                 if (map[neighbourX][neighbourY]<3 && !neighbours.contains(neighbourString) && neighbourString != current && !explored.contains(neighbourString)) {
-                  neighbours.add(neighbourString);
+                  neighbours.add(neighbourString); 
                   parentMap.put(neighbourString, current);
                 }
               }
@@ -306,7 +316,7 @@ public class Map {
       this.generate();
     } else {
       map = new int[WIDTH_NUM][HEIGHT_NUM];
-      this.generate();
+      this.initMap();
     }
   }
 }

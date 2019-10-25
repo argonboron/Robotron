@@ -9,13 +9,17 @@ void draw() {
 
 void keyPressed(){
   if (key == '1') {
-    map.mapMasses();
+    map = new Map(false);
   } else if (key == '2') {
-    map.mergeMasses();
-  } else {
     for (int i = 0; i < 10; i++){
       map.step();
     }
+  } else if (key =='3') {
+    map.mapMasses();
+  } else if (key == '4') {
+    map.mergeMasses();
+  }else {
+    map = new Map(true);
   }
  }
 

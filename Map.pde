@@ -6,7 +6,8 @@ import java.util.Collections;
 
 public class Map {
   ArrayList<ArrayList<int[]>> masses = new ArrayList<ArrayList<int[]>>();
-  ArrayList<ArrayList<Cell>> map;
+  ArrayList<int[]> knownObstacles = new ArrayList<int[]>();
+  Cell[][] map;
   int MAP_SIZE = 50;
   int DEATH_NUM = 4;
   int BIRTH_NUM = 4;
@@ -23,45 +24,57 @@ public class Map {
     }
     clearMasses();
   }
+  
+  Cell getSpawnCell() {
+    Cell cell;
+    int x = 0;
+    int y = 0;
+    boolean isValid = false;
+    while(!isValid) {
+      x = (int) random(0, MAP_SIZE);
+      y = (int) random(0, MAP_SIZE);
+      if(!masses.get(0).contains(new int[]{x,y}) && knownObstacles.contains(new int[]{x,y})) {
+        cell = map[x][y];
+        
+      }
+    }
+    return null;
+  }
 
   void step() {
-    ArrayList<ArrayList<Cell>> newMap = new ArrayList<ArrayList<Cell>>(); 
+    Cell[][] newMap = new Cell[MAP_SIZE][MAP_SIZE]; 
     for (int x = 0; x < MAP_SIZE; x++) {
-      ArrayList<Cell> row = new ArrayList<Cell>();
       for (int y = 0; y < MAP_SIZE; y++) {
         int livingNeighbours = countLivingNeighbours(x, y);
-        if (map.get(x).get(y).getType()<3) {
+        if (map[x][y].getType()<3) {
           if (livingNeighbours < DEATH_NUM) {
-            row.add(new Cell(3));
+            newMap[x][y] = new Cell(3);
           } else {
-            row.add(new Cell(1));
+            newMap[x][y] = new Cell(1);
           }
         } else {
           if (livingNeighbours > BIRTH_NUM) {
-            row.add(new Cell(1));
+            newMap[x][y] = new Cell(1);
           } else {
-            row.add(new Cell(3));
+            newMap[x][y] = new Cell(3);
           }
         }
       }
-      newMap.add(row);
     }
     this.map = newMap;
     display();
   }
 
   void initMap() {
-    map = new ArrayList<ArrayList<Cell>>();
+    map = new Cell[MAP_SIZE][MAP_SIZE];
     for (int x = 0; x < MAP_SIZE; x++) {
-      ArrayList<Cell> row = new ArrayList<Cell>();
       for (int y = 0; y < MAP_SIZE; y++) {
         if (random(0, 100) < 45.5) {
-          row.add(new Cell(1));
+          map[x][y] = new Cell(1);
         } else {
-          row.add(new Cell(3));
+          map[x][y] = new Cell(3);
         }
       }
-      map.add(row);
     }
   }
 
@@ -74,7 +87,7 @@ public class Map {
           int neighbourY = y+yMod;
           if ((neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
             count++;
-          } else if (map.get(neighbourX).get(neighbourY).getType()<3) {
+          } else if (map[neighbourX][neighbourY].getType()<3) {
             count++;
           }
         }
@@ -87,18 +100,18 @@ public class Map {
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
         PShape cell = createShape(RECT, x*20, y*20, MAP_SIZE, MAP_SIZE);
-        if (map.get(x).get(y).getType()<3) {
+        if (map[x][y].getType()<3) {
           if (countLivingNeighbours(x, y) !=8) {
-            map.get(x).get(y).setType(2);
+            map[x][y].setType(2);
             cell.setFill(120);
           } else {
             cell.setFill(180);
           }
         } else {
-          if (map.get(x).get(y).getType()==3) {
+          if (map[x][y].getType()==3) {
             cell.setFill(10);
           } else {
-            color c = getMassColour(map.get(x).get(y).getType());
+            color c = getMassColour(map[x][y].getType());
             cell.setFill(c);
           }
         }
@@ -113,7 +126,7 @@ public class Map {
     int floodNum = 4;
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
-        if (map.get(x).get(y).getType()==3) {
+        if (map[x][y].getType()==3) {
           flood(x, y, floodNum);
           floodNum++;
         }
@@ -125,8 +138,8 @@ public class Map {
   void clearMasses() {
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
-        if (map.get(x).get(y).getType()>2) {
-          map.get(x).get(y).setType(3);
+        if (map[x][y].getType()>2) {
+          map[x][y].setType(3);
         }
       }
     }
@@ -157,7 +170,7 @@ public class Map {
     for (int i = 0; i < masses.size(); i++) {
       if (masses.get(i).size() < 30) {
         for (int[] coord : masses.get(i)) {
-          map.get(coord[0]).get(coord[1]).setType(1);
+          map[coord[0]][coord[1]].setType(1);
         }
         masses.remove(i);
         i--;
@@ -174,8 +187,15 @@ public class Map {
       }
       for (int i = 0; i < masses.size(); i++) {
         //  println ("CONNECT CALLED: " + i);
+        println(i + " - " + masses.size());
         if (i != mainMassIndex) {
           connectMasses(masses.get(i), masses.get(mainMassIndex));
+          for (int j = 0; j < masses.size(); j++) {
+            if (masses.get(j).size() > mainMassSize) {
+              mainMassSize = masses.get(j).size();
+              mainMassIndex = j;
+            }
+          }
         }
       }
     }
@@ -185,7 +205,7 @@ public class Map {
     HashMap<String, String> parentMap = new HashMap<String, String>();
     ArrayList<String> neighbours = new ArrayList<String>();
     ArrayList<String> explored = new ArrayList<String>();
-    int mainNum = map.get(main.get(0)[0]).get(main.get(0)[1]).getType();
+    int mainNum = map[main.get(0)[0]][main.get(0)[1]].getType();
     for (int[] coord : small) {
       if (countLivingNeighbours(coord[0], coord[1]) < 8) {
         for (int xMod = -1; xMod < 2; xMod++) {
@@ -196,7 +216,7 @@ public class Map {
               String parentString = Integer.toString(coord[0])+"-"+Integer.toString(coord[1]);
               String coordString = Integer.toString(neighbourX)+"-"+Integer.toString(neighbourY);
               if (!(neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
-                if (map.get(neighbourX).get(neighbourY).getType()==2 && !neighbours.contains(coordString)) {
+                if (map[neighbourX][neighbourY].getType()==2 && !neighbours.contains(coordString)) {
                   parentMap.put(coordString, parentString );
                   neighbours.add(coordString);
                 }
@@ -223,11 +243,11 @@ public class Map {
             int neighbourY = currentY+yMod;
             String neighbourString = Integer.toString(neighbourX) +"-"+ Integer.toString(neighbourY);
             if (!(neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
-              if (map.get(neighbourX).get(neighbourY).getType()==mainNum) {
+              if (map[neighbourX][neighbourY].getType()==mainNum) {
                 path = true;
                 parentMap.put(neighbourString, current);
               } else {
-                if (map.get(neighbourX).get(neighbourY).getType()<3 && !neighbours.contains(neighbourString) && neighbourString != current && !explored.contains(neighbourString)) {
+                if (map[neighbourX][neighbourY].getType()<3 && !neighbours.contains(neighbourString) && neighbourString != current && !explored.contains(neighbourString)) {
                   neighbours.add(neighbourString); 
                   parentMap.put(neighbourString, current);
                 }
@@ -242,8 +262,8 @@ public class Map {
       pathList.add(current);
       int currentX = Integer.parseInt(current.split("-")[0]);
       int currentY = Integer.parseInt(current.split("-")[1]);
-      while (map.get(currentX).get(currentY).getType() < 4) {
-        map.get(currentX).get(currentY).setType(3);
+      while (map[currentX][currentY].getType() < 4) {
+        map[currentX][currentY].setType(3);
         current = parentMap.get(current);
         pathList.add(current);
         currentX = Integer.parseInt(current.split("-")[0]);
@@ -257,7 +277,7 @@ public class Map {
             int neighbourX = Integer.parseInt(coord.split("-")[0])+xMod;
             int neighbourY = Integer.parseInt(coord.split("-")[1])+yMod;
             if (!(neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
-              map.get(neighbourX).get(neighbourY).setType(3);
+              map[neighbourX][neighbourY].setType(3);
             }
           }
         }
@@ -281,32 +301,32 @@ public class Map {
             int neighbourY = currentY+yMod;
             String neighbourString = Integer.toString(neighbourX) +"-"+ Integer.toString(neighbourY);
             if (!(neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
-              if (map.get(neighbourX).get(neighbourY).getType()==3 && !unfilled.contains(neighbourString)) {
+              if (map[neighbourX][neighbourY].getType()==3 && !unfilled.contains(neighbourString)) {
                 unfilled.push(neighbourString);
-                map.get(neighbourX).get(neighbourY).setType(floodNum);
+                map[neighbourX][neighbourY].setType(floodNum);
               }
             }
           }
         }
       }
-      map.get(x).get(y).setType(floodNum);
+      map[x][y].setType(floodNum);
       mass.add(new int[]{currentX, currentY});
     }
     masses.add(mass);
   }
 
   void retract() {
-    ArrayList<ArrayList<Cell>> newMap = new ArrayList<ArrayList<Cell>>(); 
+    Cell[][] newMap = new Cell[MAP_SIZE][MAP_SIZE]; 
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
-        if (map.get(x).get(y).getType()<3) {
+        if (map[x][y].getType()<3) {
           if (countLivingNeighbours(x, y) !=8) {
-            newMap.get(x).get(y).setType(3);
+            newMap[x][y].setType(3);
           } else {
-            newMap.get(x).get(y).setType(1);
+            newMap[x][y].setType(1);
           }
         } else {
-          newMap.get(x).get(y).setType(3);
+          newMap[x][y].setType(3);
         }
       }
     }

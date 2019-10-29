@@ -1,7 +1,8 @@
-import java.util.Stack; //<>// //<>//
+import java.util.Stack; //<>// //<>// //<>// //<>//
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Comparator;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class Map {
@@ -11,7 +12,6 @@ public class Map {
   int MAP_SIZE = 50;
   int DEATH_NUM = 4;
   int BIRTH_NUM = 4;
-  boolean massCols;
 
   void generate() {
     initMap();
@@ -23,22 +23,32 @@ public class Map {
       mergeMasses();
     }
     clearMasses();
+    for (int i = 0; i < 5; i++) {
+      step();
+    }
   }
-  
+
   Cell getSpawnCell() {
-    Cell cell;
+    Cell cell = null;
     int x = 0;
     int y = 0;
-    boolean isValid = false;
-    while(!isValid) {
+    while (cell==null) {
       x = (int) random(0, MAP_SIZE);
       y = (int) random(0, MAP_SIZE);
-      if(!masses.get(0).contains(new int[]{x,y}) && knownObstacles.contains(new int[]{x,y})) {
+      if (isIn(masses.get(0), new int[]{x, y}) && !isIn(knownObstacles, new int[]{x, y})) {
         cell = map[x][y];
-        
       }
     }
-    return null;
+    return cell;
+  }
+
+  public boolean isIn(ArrayList<int[]> map, int[] coords) {
+    for (int[] coord : map) {
+      if (Arrays.equals(coord, coords)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void step() {
@@ -48,15 +58,15 @@ public class Map {
         int livingNeighbours = countLivingNeighbours(x, y);
         if (map[x][y].getType()<3) {
           if (livingNeighbours < DEATH_NUM) {
-            newMap[x][y] = new Cell(3);
+            newMap[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10));
           } else {
-            newMap[x][y] = new Cell(1);
+            newMap[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10));
           }
         } else {
           if (livingNeighbours > BIRTH_NUM) {
-            newMap[x][y] = new Cell(1);
+            newMap[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10));
           } else {
-            newMap[x][y] = new Cell(3);
+            newMap[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10));
           }
         }
       }
@@ -70,13 +80,127 @@ public class Map {
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
         if (random(0, 100) < 45.5) {
-          map[x][y] = new Cell(1);
+          map[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10));
         } else {
-          map[x][y] = new Cell(3);
+          map[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10));
         }
       }
     }
   }
+
+  Cell pointToCell(PVector point) {
+    for (int x = 0; x < MAP_SIZE; x++) {
+      for (int y = 0; y < MAP_SIZE; y++) {
+        if (map[x][y].isInside(point)) {
+          return map[x][y];
+        }
+      }
+    }
+    return null;
+  }
+
+  int[] pointToIndex(PVector point) {
+    for (int x = 0; x < MAP_SIZE; x++) {
+      for (int y = 0; y < MAP_SIZE; y++) {
+        if (map[x][y].isInside(point)) {
+          return new int[]{x, y};
+        }
+      }
+    }
+    return null;
+  }
+
+  boolean isHittingWall(PVector point, String dir) {
+    int[] index = pointToIndex(point.copy());
+    switch (dir) {
+    case "up":
+      if (index[1] == 0) {
+        return point.y<=9.5;
+      } else {
+        if (map[index[0]][index[1]-1].getType() < 3) {
+          PVector nPoint = point.copy().add(0, -12.5);
+          return map[index[0]][index[1]-1].isInside(nPoint);
+        }
+      }
+      break;
+    case "down":
+      if (index[1] == MAP_SIZE-1) {
+        return point.y >= 1000-9.5;
+      } else {
+        if (map[index[0]][index[1]+1].getType() < 3) {
+          PVector sPoint = point.copy().add(0, 12.5);
+          return map[index[0]][index[1]+1].isInside(sPoint);
+        }
+      }
+      break;
+    case "left":
+      if (index[0] == 0) {
+        return point.x<=9.5;
+      } else {
+        if (map[index[0]-1][index[1]].getType() < 3) {
+          PVector wPoint = point.copy().add(-12.5, 0);
+          return map[index[0]-1][index[1]].isInside(wPoint);
+        }
+      }
+      break;
+    case "right":
+      if (index[0] == MAP_SIZE-1) {
+        return point.x>=1000-9.5;
+      } else {
+        if (map[index[0]+1][index[1]].getType() < 3) {
+          PVector ePoint = point.copy().add(12.5, 0);
+          return map[index[0]+1][index[1]].isInside(ePoint);
+        }
+      }
+      break;
+    case "topright":
+      if (index[0] == MAP_SIZE-1) {
+        return point.x>=9.5;
+      } else if (index[1] == 0) {
+        return point.y<=9.5;
+      } else if (map[index[0]+1][index[1]-1].getType() < 3) {
+        PVector nPoint = point.copy().add(0, -9.5);
+        PVector ePoint = point.copy().add(9.5, 0);
+        return (map[index[0]+1][index[1]].isInside(ePoint) && map[index[0]][index[1]-1].isInside(nPoint));
+      }
+      break;
+    case "topleft":
+      if (index[0] == 0) {
+        return point.x<=9.5;
+      } else if (index[1] == 0) {
+        return point.y<=9.5;
+      } else if (map[index[0]-1][index[1]-1].getType() < 3) {
+        PVector nPoint = point.copy().add(0, -9.5);
+        PVector wPoint = point.copy().add(-9.5, 0);
+        return (map[index[0]-1][index[1]].isInside(wPoint) && map[index[0]][index[1]-1].isInside(nPoint));
+      }
+      break;
+    case "bottomleft":
+      if (index[0] == 0) {
+        return point.x<=9.5;
+      } else if (index[1] == MAP_SIZE-1) {
+        return point.y>=1000-9.5;
+      } else if (map[index[0]-1][index[1]+1].getType() < 3) {
+        PVector sPoint = point.copy().add(0, 9.5);
+        PVector wPoint = point.copy().add(-9.5, 0);
+        return (map[index[0]-1][index[1]].isInside(wPoint) && map[index[0]][index[1]+1].isInside(sPoint));
+      }
+      break;      
+    case "bottomright":
+      if (index[0] == MAP_SIZE-1) {
+        return point.x>=1000-9.5;
+      } else if (index[1] == MAP_SIZE-1) {
+        return point.y>=1000-9.5;
+      } else if (map[index[0]+1][index[1]+1].getType() < 3) {
+        PVector sPoint = point.copy().add(0, 9.5);
+        PVector ePoint = point.copy().add(9.5, 0);
+        return (map[index[0]+1][index[1]].isInside(ePoint) && map[index[0]][index[1]+1].isInside(sPoint));
+      }
+      break;
+    }
+    return false;
+  }
+
 
   int countLivingNeighbours(int x, int y) {
     int count = 0;
@@ -132,7 +256,6 @@ public class Map {
         }
       }
     }
-    massCols = true;
   }
 
   void clearMasses() {
@@ -186,8 +309,6 @@ public class Map {
         }
       }
       for (int i = 0; i < masses.size(); i++) {
-        //  println ("CONNECT CALLED: " + i);
-        println(i + " - " + masses.size());
         if (i != mainMassIndex) {
           connectMasses(masses.get(i), masses.get(mainMassIndex));
           for (int j = 0; j < masses.size(); j++) {
@@ -315,24 +436,6 @@ public class Map {
     masses.add(mass);
   }
 
-  void retract() {
-    Cell[][] newMap = new Cell[MAP_SIZE][MAP_SIZE]; 
-    for (int x = 0; x < MAP_SIZE; x++) {
-      for (int y = 0; y < MAP_SIZE; y++) {
-        if (map[x][y].getType()<3) {
-          if (countLivingNeighbours(x, y) !=8) {
-            newMap[x][y].setType(3);
-          } else {
-            newMap[x][y].setType(1);
-          }
-        } else {
-          newMap[x][y].setType(3);
-        }
-      }
-    }
-    this.map = newMap;
-  }
-
   public Map(boolean premake) {
     if (premake) {
       this.generate();
@@ -353,6 +456,7 @@ class CustomComparator implements Comparator<String> {
 
     int aDiff = Math.abs(aX-24)+Math.abs(aY-24);
     int bDiff = Math.abs(bX-24)+Math.abs(bY-24);
+
     return  aDiff-bDiff;
   }
 }

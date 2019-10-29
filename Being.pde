@@ -1,5 +1,5 @@
 public abstract class Being {
-  Cell position;
+  PVector position;
   boolean alive;
   int speed;
   

@@ -58,15 +58,15 @@ public class Map {
         int livingNeighbours = countLivingNeighbours(x, y);
         if (map[x][y].getType()<3) {
           if (livingNeighbours < DEATH_NUM) {
-            newMap[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10));
+            newMap[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10), x, y);
           } else {
-            newMap[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10));
+            newMap[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10), x, y);
           }
         } else {
           if (livingNeighbours > BIRTH_NUM) {
-            newMap[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10));
+            newMap[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10), x, y);
           } else {
-            newMap[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10));
+            newMap[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10), x, y);
           }
         }
       }
@@ -80,9 +80,9 @@ public class Map {
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
         if (random(0, 100) < 45.5) {
-          map[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10));
+          map[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10), x, y);
         } else {
-          map[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10));
+          map[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10), x, y);
         }
       }
     }
@@ -406,6 +406,10 @@ public class Map {
     }
     mapMasses();
   }
+  
+  void set(PVector point, int num) {
+    pointToCell(point).setType(num);
+  }
 
   void flood(int x, int y, int floodNum) {
     ArrayList<int[]> mass = new ArrayList<int[]>();
@@ -434,6 +438,44 @@ public class Map {
       mass.add(new int[]{currentX, currentY});
     }
     masses.add(mass);
+  }
+  
+  ArrayList<Cell> getNeighbours(int[] index) {
+    ArrayList<Cell> neighbours = new ArrayList<Cell>();
+    for (int xMod = -1; xMod < 2; xMod++) {
+      for (int yMod = -1; yMod < 2; yMod++) {
+        if (!(xMod == 0 && yMod == 0)) {
+          int neighbourX = index[0]+xMod;
+          int neighbourY = index[1]+yMod;
+          if (!(neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
+            if(map[neighbourX][neighbourY].getType() >2 && !isIn(knownObstacles, new int[]{neighbourX, neighbourY}) && diagonalCheck(new int[]{neighbourX, neighbourY}, index)){
+              neighbours.add(map[neighbourX][neighbourY]);
+            }
+          }
+        }
+      }
+    }
+    return neighbours;
+  }
+  
+  boolean diagonalCheck(int[] next, int[] current) {
+    if (next[0] == current[0] || next[1] == current[1]){
+      return true;
+    } else {
+      if (next[0] > current[0]) {
+        if (next[1] < current[1]) {
+          return (map[current[0]][current[1]-1].getType()>2 && map[current[0]+1][current[1]].getType()>2);
+        } else {
+          return (map[current[0]][current[1]+1].getType()>2 && map[current[0]+1][current[1]].getType()>2);
+        }
+      } else {
+        if (next[1] < current[1]) {
+          return (map[current[0]][current[1]-1].getType()>2 && map[current[0]-1][current[1]].getType()>2);
+        } else {
+          return (map[current[0]][current[1]+1].getType()>2 && map[current[0]-1][current[1]].getType()>2);
+        }
+      }
+    }
   }
 
   public Map(boolean premake) {

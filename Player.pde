@@ -1,8 +1,5 @@
 public class Player extends Being {
   int lives;
-  PVector velocity;
-  PVector position;
-  PVector acceleration;
 
   void display() {
     velocity.add(acceleration.copy());
@@ -12,7 +9,9 @@ public class Player extends Being {
     ellipseMode(CENTER);
     ellipse(position.x, position.y, 18.5, 18.5);
   }
-
+  PVector getPosition() {
+    return this.position.copy();
+  }
   void collisionCheck() {
     int[] index = map.pointToIndex(position.copy());
     int neighbours = map.countLivingNeighbours(index[0], index[1]);
@@ -116,9 +115,6 @@ public class Player extends Being {
         acceleration.add(new PVector(4, 0));
       }
     }
-    println(acceleration);
-    println(velocity);
-    velocity.setMag(4);
   }
 
   Player(Cell startCell) {

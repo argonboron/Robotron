@@ -1,13 +1,16 @@
 Map map;
 Player player;
+Grunt grunt;
 void setup() {
   size(1000, 1000);
   map = new Map(true);
   player = new Player(map.getSpawnCell());
+  grunt = new Grunt(map.getSpawnCell());
 }
 void draw() {
   map.display();
   player.display();
+  grunt.display();
 } 
 
 void keyPressed() {
@@ -32,6 +35,7 @@ void keyPressed() {
   } else {
     map = new Map(true);
     player = new Player(map.getSpawnCell());
+    grunt = new Grunt(map.getSpawnCell());
   }
 }
 

@@ -2,6 +2,8 @@ public abstract class Being {
   PVector position;
   boolean alive;
   int speed;
+  PVector velocity;
+  PVector acceleration;
   
   
   void move(){}
@@ -10,9 +12,6 @@ public abstract class Being {
     return this.alive;
   }
   
-  boolean isTouching(PVector pos, int size) {
-    return false;
-  }
   void display(){
     
   }

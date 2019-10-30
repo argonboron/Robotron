@@ -1,83 +1,31 @@
 public class Player extends Being {
   int lives;
+  int score;
 
-  void display() {
+  boolean display() {
+    alive = lives > 0;
     velocity.add(acceleration.copy());
-    collisionCheck();
+    collisionCheck(true);
     velocity.setMag(4);
     position.add(velocity.copy());
     ellipseMode(CENTER);
     ellipse(position.x, position.y, 18.5, 18.5);
+    return alive;
+  }
+  
+  void gotHuman(int type) {
+    //implement scoring
+  }
+
+  boolean isMoving() {
+    return (velocity.x!=0 || velocity.y !=0);
   }
   PVector getPosition() {
     return this.position.copy();
   }
-  void collisionCheck() {
-    int[] index = map.pointToIndex(position.copy());
-    int neighbours = map.countLivingNeighbours(index[0], index[1]);
-    boolean hit = false;
-    if (neighbours > 0) {
-      if (map.isHittingWall(position.copy(), "up")) {
-          hit = true;
-        if (velocity.y < 0) {
-          velocity.y=0;
-        }
-      }
-      if (map.isHittingWall(position.copy(), "down")) {
-          hit = true;
-        if (velocity.y > 0) {
-          velocity.y=0;
-          hit = true;
-        }
-      }
-      if (map.isHittingWall(position.copy(), "left")) {
-          hit = true;
-        if (velocity.x < 0) {
-          velocity.x=0;
-        }
-      }
-      if (map.isHittingWall(position.copy(), "right")) {
-          hit = true;
-        if (velocity.x > 0) {
-          velocity.x=0;
-        }
-      }
-      if (!hit) {
-        if (map.isHittingWall(position.copy(), "topright")) {
-          if (velocity.x > 0) {
-            velocity.x=0;
-          }
-          if (velocity.y < 0) {
-            velocity.y=0;
-          }
-        }
-        if (map.isHittingWall(position.copy(), "bottomright")) {
-          if (velocity.x > 0) {
-            velocity.x=0;
-          }        
-          if (velocity.y > 0) {
-            velocity.y=0;
-          }
-        }
-        if (map.isHittingWall(position.copy(), "topleft")) {
-          if (velocity.y < 0) {
-            velocity.y=0;
-          }
-          if (velocity.x < 0) {
-            velocity.x=0;
-          }
-        }
-        if (map.isHittingWall(position.copy(), "bottomleft")) {
-          if (velocity.y > 0) {
-            velocity.y=0;
-          }
-          if (velocity.x < 0) {
-            velocity.x=0;
-          }
-        }
-      }
-      hit = false;
-    }
+
+  void hit() {
+    lives--;
   }
 
   void stop(int dir) {
@@ -118,6 +66,7 @@ public class Player extends Being {
   }
 
   Player(Cell startCell) {
+    alive = true;
     velocity = new PVector(0, 0);
     acceleration = new PVector(0, 0);
     lives = 3;

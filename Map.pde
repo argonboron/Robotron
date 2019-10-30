@@ -35,7 +35,7 @@ public class Map {
     while (cell==null) {
       x = (int) random(0, MAP_SIZE);
       y = (int) random(0, MAP_SIZE);
-      if (isIn(masses.get(0), new int[]{x, y}) && !isIn(knownObstacles, new int[]{x, y})) {
+      if (map[x][y].getType() > 2 && !isIn(knownObstacles, new int[]{x, y})) {
         cell = map[x][y];
       }
     }
@@ -89,6 +89,7 @@ public class Map {
   }
 
   Cell pointToCell(PVector point) {
+    Cell returnCell = null;
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
         if (map[x][y].isInside(point)) {
@@ -96,29 +97,64 @@ public class Map {
         }
       }
     }
-    return null;
+    int num = 1;
+    while (returnCell == null) {
+      float add  = (random(-num, num));
+      num= num+8;
+      for (int x = 0; x < MAP_SIZE; x++) {
+        for (int y = 0; y < MAP_SIZE; y++) {
+          if (map[x][y].isInside(point.copy().add(add, add))) {
+            returnCell = map[x][y];
+          }
+        }
+      }
+    }
+    return returnCell;
   }
 
   int[] pointToIndex(PVector point) {
+    int[] returnIndex = null;
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
         if (map[x][y].isInside(point)) {
           return new int[]{x, y};
         }
       }
-    }
-    return null;
+    }    
+    int num = 1;
+    while (returnIndex == null) {
+      float add  = (random(-num, num));
+      num= num+8;
+
+      for (int x = 0; x < MAP_SIZE; x++) {
+        for (int y = 0; y < MAP_SIZE; y++) {
+          if (map[x][y].isInside(point.copy().add(add, add))) {
+            returnIndex = new int[]{x, y};
+          }
+        }
+      }
+    }   
+    return returnIndex;
   }
 
-  boolean isHittingWall(PVector point, String dir) {
+  boolean isHittingWall(PVector point, String dir, boolean isPlayer) {
     int[] index = pointToIndex(point.copy());
+    float checkSize = 0;
+    float diagonalSize = 0;
+    if (isPlayer) {
+      checkSize = 12.5;
+      diagonalSize = 9.5;
+    } else {
+      checkSize = 10.5;
+      diagonalSize = 7;
+    }
     switch (dir) {
     case "up":
       if (index[1] == 0) {
         return point.y<=9.5;
       } else {
         if (map[index[0]][index[1]-1].getType() < 3) {
-          PVector nPoint = point.copy().add(0, -12.5);
+          PVector nPoint = point.copy().add(0, checkSize*-1);
           return map[index[0]][index[1]-1].isInside(nPoint);
         }
       }
@@ -128,7 +164,7 @@ public class Map {
         return point.y >= 1000-9.5;
       } else {
         if (map[index[0]][index[1]+1].getType() < 3) {
-          PVector sPoint = point.copy().add(0, 12.5);
+          PVector sPoint = point.copy().add(0, checkSize);
           return map[index[0]][index[1]+1].isInside(sPoint);
         }
       }
@@ -138,7 +174,7 @@ public class Map {
         return point.x<=9.5;
       } else {
         if (map[index[0]-1][index[1]].getType() < 3) {
-          PVector wPoint = point.copy().add(-12.5, 0);
+          PVector wPoint = point.copy().add(checkSize*-1, 0);
           return map[index[0]-1][index[1]].isInside(wPoint);
         }
       }
@@ -148,7 +184,7 @@ public class Map {
         return point.x>=1000-9.5;
       } else {
         if (map[index[0]+1][index[1]].getType() < 3) {
-          PVector ePoint = point.copy().add(12.5, 0);
+          PVector ePoint = point.copy().add(checkSize, 0);
           return map[index[0]+1][index[1]].isInside(ePoint);
         }
       }
@@ -159,8 +195,8 @@ public class Map {
       } else if (index[1] == 0) {
         return point.y<=9.5;
       } else if (map[index[0]+1][index[1]-1].getType() < 3) {
-        PVector nPoint = point.copy().add(0, -9.5);
-        PVector ePoint = point.copy().add(9.5, 0);
+        PVector nPoint = point.copy().add(0, diagonalSize*-1);
+        PVector ePoint = point.copy().add(diagonalSize, 0);
         return (map[index[0]+1][index[1]].isInside(ePoint) && map[index[0]][index[1]-1].isInside(nPoint));
       }
       break;
@@ -170,19 +206,19 @@ public class Map {
       } else if (index[1] == 0) {
         return point.y<=9.5;
       } else if (map[index[0]-1][index[1]-1].getType() < 3) {
-        PVector nPoint = point.copy().add(0, -9.5);
-        PVector wPoint = point.copy().add(-9.5, 0);
+        PVector nPoint = point.copy().add(0, diagonalSize*-1);
+        PVector wPoint = point.copy().add(diagonalSize*-1, 0);
         return (map[index[0]-1][index[1]].isInside(wPoint) && map[index[0]][index[1]-1].isInside(nPoint));
       }
       break;
-    case "bottomleft":
+    case "bottomleft": 
       if (index[0] == 0) {
         return point.x<=9.5;
       } else if (index[1] == MAP_SIZE-1) {
         return point.y>=1000-9.5;
       } else if (map[index[0]-1][index[1]+1].getType() < 3) {
-        PVector sPoint = point.copy().add(0, 9.5);
-        PVector wPoint = point.copy().add(-9.5, 0);
+        PVector sPoint = point.copy().add(0, diagonalSize);
+        PVector wPoint = point.copy().add(diagonalSize*-1, 0);
         return (map[index[0]-1][index[1]].isInside(wPoint) && map[index[0]][index[1]+1].isInside(sPoint));
       }
       break;      
@@ -192,8 +228,8 @@ public class Map {
       } else if (index[1] == MAP_SIZE-1) {
         return point.y>=1000-9.5;
       } else if (map[index[0]+1][index[1]+1].getType() < 3) {
-        PVector sPoint = point.copy().add(0, 9.5);
-        PVector ePoint = point.copy().add(9.5, 0);
+        PVector sPoint = point.copy().add(0, diagonalSize);
+        PVector ePoint = point.copy().add(diagonalSize, 0);
         return (map[index[0]+1][index[1]].isInside(ePoint) && map[index[0]][index[1]+1].isInside(sPoint));
       }
       break;
@@ -240,6 +276,16 @@ public class Map {
           }
         }
         shape(cell);
+      }
+    }
+  }
+
+  void resetColours() {
+    for (int x = 0; x < MAP_SIZE; x++) {
+      for (int y = 0; y < MAP_SIZE; y++) {
+        if (map[x][y].getType()>3) {
+          map[x][y].setType(3);
+        }
       }
     }
   }
@@ -406,9 +452,9 @@ public class Map {
     }
     mapMasses();
   }
-  
+
   void set(PVector point, int num) {
-    pointToCell(point).setType(num);
+    //pointToCell(point).setType(num);
   }
 
   void flood(int x, int y, int floodNum) {
@@ -439,7 +485,7 @@ public class Map {
     }
     masses.add(mass);
   }
-  
+
   ArrayList<Cell> getNeighbours(int[] index) {
     ArrayList<Cell> neighbours = new ArrayList<Cell>();
     for (int xMod = -1; xMod < 2; xMod++) {
@@ -448,7 +494,7 @@ public class Map {
           int neighbourX = index[0]+xMod;
           int neighbourY = index[1]+yMod;
           if (!(neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
-            if(map[neighbourX][neighbourY].getType() >2 && !isIn(knownObstacles, new int[]{neighbourX, neighbourY}) && diagonalCheck(new int[]{neighbourX, neighbourY}, index)){
+            if (map[neighbourX][neighbourY].getType() >2 && !isIn(knownObstacles, new int[]{neighbourX, neighbourY}) && diagonalCheck(new int[]{neighbourX, neighbourY}, index)) {
               neighbours.add(map[neighbourX][neighbourY]);
             }
           }
@@ -457,9 +503,9 @@ public class Map {
     }
     return neighbours;
   }
-  
+
   boolean diagonalCheck(int[] next, int[] current) {
-    if (next[0] == current[0] || next[1] == current[1]){
+    if (next[0] == current[0] || next[1] == current[1]) {
       return true;
     } else {
       if (next[0] > current[0]) {

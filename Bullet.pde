@@ -11,6 +11,9 @@ public class Bullet {
     ellipse(position.x, position.y, size, size);
     fill(255);
   }
+  PVector getPosition() {
+    return this.position.copy();
+  }
 
   public Bullet(PVector start, PVector target) {
     this.position = start;

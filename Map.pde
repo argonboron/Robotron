@@ -8,12 +8,15 @@ import java.util.Collections;
 public class Map {
   ArrayList<ArrayList<int[]>> masses = new ArrayList<ArrayList<int[]>>();
   ArrayList<int[]> knownObstacles = new ArrayList<int[]>();
+  ArrayList<int[]> spawnPositions = new ArrayList<int[]>();
   Cell[][] map;
   int MAP_SIZE = 50;
   int DEATH_NUM = 4;
   int BIRTH_NUM = 4;
 
   void generate() {
+    knownObstacles.clear();
+    spawnPositions.clear();
     initMap();
     for (int i = 0; i < 10; i++) {
       step();
@@ -35,10 +38,11 @@ public class Map {
     while (cell==null) {
       x = (int) random(0, MAP_SIZE);
       y = (int) random(0, MAP_SIZE);
-      if (map[x][y].getType() > 2 && !isIn(knownObstacles, new int[]{x, y})) {
+      if (map[x][y].getType() > 2 && !isIn(knownObstacles, new int[]{x, y}) && !isIn(spawnPositions, new int[]{x, y})) {
         cell = map[x][y];
       }
     }
+    spawnPositions.add(new int[]{x, y});
     return cell;
   }
 
@@ -49,6 +53,14 @@ public class Map {
       }
     }
     return false;
+  }
+  
+  void addObstacle(int[] index) {
+    knownObstacles.add(index);
+  }
+  
+  void removeObstacle(int[] index) {
+    knownObstacles.remove(index);
   }
 
   void step() {
@@ -454,7 +466,7 @@ public class Map {
   }
 
   void set(PVector point, int num) {
-    //pointToCell(point).setType(num);
+    pointToCell(point).setType(num);
   }
 
   void flood(int x, int y, int floodNum) {

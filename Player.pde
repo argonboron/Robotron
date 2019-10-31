@@ -20,9 +20,6 @@ public class Player extends Being {
   boolean isMoving() {
     return (velocity.x!=0 || velocity.y !=0);
   }
-  PVector getPosition() {
-    return this.position.copy();
-  }
 
   void hit() {
     lives--;

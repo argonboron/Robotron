@@ -1,4 +1,4 @@
-public class Grunt extends Robot {
+public class Grunt extends Being  {
   final float size = 18.5; 
 
 
@@ -15,21 +15,15 @@ public class Grunt extends Robot {
     float xe = position.x, ye = position.y ;
     fill(255, 255, 0) ;
     ellipse(xe, ye, size, size) ;
-    // Show orientation
     int newxe = (int)(xe + 6.5 * cos(orientation)) ;
     int newye = (int)(ye + 6.5 * sin(orientation)) ;
     fill(255, 0, 0);
     ellipse(newxe, newye, 5.5, 5.5) ;  
     fill(255);
-
-    // Update Eno: seek
     targetVel.x = target.x - xe ;
     targetVel.y = target.y - ye ;
-    // or flee...
-    //targetVel.x = xe - targetX  ;
-    //targetVel.y = ye - targetY  ;  
     integrate(targetVel) ;
-    hunt = (player.getPosition().dist(position)<200);
+    hunt = (player.getPosition().dist(position)<175);
     if (hunt) {
       if (path != null) {
         if (map.pointToCell(player.getPosition()).getCentre() != map.pointToCell(path.get(path.size()-1)).getCentre()) {
@@ -42,7 +36,7 @@ public class Grunt extends Robot {
         if (path.size()>1) {
           target = followPath();
         } else {
-          target = player.position;
+          target = player.getPosition();
         }
       }
     } else {
@@ -64,6 +58,7 @@ public class Grunt extends Robot {
 
   Grunt(Cell startCell) {
     alive = true;
+    speed = 3f;
     velocity = new PVector(0, 0);
     position = startCell.getCentre().copy();
     randomTarget = map.getSpawnCell().getCentre().copy();
@@ -71,7 +66,7 @@ public class Grunt extends Robot {
       randomTarget = map.getSpawnCell().getCentre().copy();
     }
     acceleration = new PVector(0, 0);
-    hunt = (player.getPosition().dist(position)<200);
+    hunt = (player.getPosition().dist(position)<175);
     if (hunt) {
       target = player.getPosition();
     } else {

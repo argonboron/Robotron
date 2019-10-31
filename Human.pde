@@ -44,12 +44,13 @@ public class Human extends Being {
     }
     ellipse(position.x, position.y, size, size) ;
     fill(0);
-    int newxe = (int)(xe + 6.5 * cos(orientation)) ;
-    int newye = (int)(ye + 6.5 * sin(orientation)) ;
+    int newxe = (int)(xe + 4 * cos(orientation)) ;
+    int newye = (int)(ye + 4 * sin(orientation)) ;
     fill(255, 255, 0);
     ellipse(newxe, newye, 5.5, 5.5) ;  
     fill(255);
     if (state==1) {
+        speed = 3f;
       if (path != null) {
         if (path.size()>1) {
           target = followPath();
@@ -67,9 +68,11 @@ public class Human extends Being {
       }
     } else {
       if (state == 2) {
+        speed = 3f;
         targetVel.x = target.x - xe ;
         targetVel.y = target.y - ye ;
       } else if (state == 3) {
+        speed = 3.3f;
         targetVel.x = xe - target.x;
         targetVel.y = ye - target.y;
       }
@@ -107,6 +110,7 @@ public class Human extends Being {
   public Human(Cell startCell) {
     alive = true;
     state = 1;
+    speed = 3f;
     type = (int) random(1, 4);
     targetVel = new PVector(0, 0);
     velocity = new PVector(0, 0);

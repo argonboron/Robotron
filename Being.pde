@@ -2,39 +2,54 @@ public abstract class Being {
   ArrayList<PVector> path = new ArrayList<PVector>();
   PVector position, target, velocity, acceleration, targetVel, randomTarget;
   Node goalNode;
-  boolean alive;
-  float orientation;
+  boolean alive, hunt;
+  float orientation, speed;
   final float ORIENTATION_INCREMENT = PI/32 ;
-  
-  
+
+
   void integrate(PVector targetVel) {
     velocity = targetVel;
     velocity.normalize() ;
-    velocity.mult(3f) ;
+    velocity.mult(speed) ;
     collisionCheck(false);
     position.add(velocity) ;
-    // Apply an impulse to bounce off the edge of the screen
-    if ((position.x < 0) || (position.x > width)) velocity.x = -velocity.x ;
-    if ((position.y < 0) || (position.y > height)) velocity.y = -velocity.y ;
+    if ((position.x < 0) || (position.x > 1000)) {
+      velocity.x = -velocity.x;
+    }
+    if ((position.y < 0) || (position.y > 1000)) {
+      velocity.y = -velocity.y;
+    }
     float targetOrientation = atan2(velocity.y, velocity.x) ;
-    if (abs(targetOrientation - orientation) <=
-      ORIENTATION_INCREMENT) {
+    if (abs(targetOrientation - orientation) <= ORIENTATION_INCREMENT) {
       orientation = targetOrientation ;
       return ;
     }
     if (targetOrientation < orientation) {
-      if (orientation - targetOrientation < PI) orientation -= ORIENTATION_INCREMENT ;
-      else orientation += ORIENTATION_INCREMENT ;
+      if (orientation - targetOrientation < PI) {
+        orientation -= ORIENTATION_INCREMENT;
+      } else {
+        orientation += ORIENTATION_INCREMENT;
+      }
     } else {
-      if (targetOrientation - orientation < PI) orientation += ORIENTATION_INCREMENT ;
-      else orientation -= ORIENTATION_INCREMENT ;
+      if (targetOrientation - orientation < PI) {
+        orientation += ORIENTATION_INCREMENT;
+      } else {
+        orientation -= ORIENTATION_INCREMENT;
+      }
     }
-    if (orientation > PI) orientation -= 2*PI ;
-    else if (orientation < -PI) orientation += 2*PI ;
+    if (orientation > PI) {
+      orientation -= 2*PI;
+    } else if (orientation < -PI) {
+      orientation += 2*PI ;
+    }
   }
-  
+
   void die() {
     alive = false;
+  }
+  
+  PVector getPosition() {
+    return this.position.copy();
   }
 
   ArrayList<PVector> getPath(PVector target) {
@@ -81,7 +96,7 @@ public abstract class Being {
               predecessorMap.put(neighbour, current);
               neighbour.setParent(current);
               // Add to frontier
-              map.set(neighbour.getCentre(), 6);
+              //map.set(neighbour.getCentre(), 6);
               frontier.add(neighbour);
             } else {
               if (calculateCost(current, neighbour) < frontier.get(indexFromFrontier(frontier, neighbour)).getCost()) {
@@ -104,12 +119,12 @@ public abstract class Being {
         }
       }
       // Add to explored
-      map.set(current.getCentre(), 5);
+      //map.set(current.getCentre(), 5);
       explored.add(current.getCentre().copy());
     }
     return makePath(target, predecessorMap, found);
   }
-  
+
   void collisionCheck(boolean player) {
     int[] index = map.pointToIndex(position.copy());
     int neighbours = map.countLivingNeighbours(index[0], index[1]);
@@ -202,8 +217,8 @@ public abstract class Being {
       return 28 + current.getCost();
     }
   }
-  
-  
+
+
   PVector followPath() {
     if (map.pointToCell(position) != null) {
       if (map.pointToCell(position).getCentre() == map.pointToCell(path.get(0)).getCentre()) {
@@ -240,14 +255,7 @@ public abstract class Being {
       neighbours.add(newNode);
     }
     return neighbours;
-  }
-
-
-
-
-  boolean isAlive() {
-    return this.alive;
-  }
+  } 
 
   boolean display() {
     return alive;

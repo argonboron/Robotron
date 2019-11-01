@@ -1,5 +1,4 @@
 public class Brain extends Being {
-  final float size = 18.5; 
   Cell targetCell;
 
   boolean display() {
@@ -65,6 +64,7 @@ public class Brain extends Being {
   Brain(Cell startCell, Cell humanTargetCell) {
     alive = true;
     speed = 2.7f;
+    size = 18.5;
     velocity = new PVector(0, 0);
     position = startCell.getCentre().copy();
     targetCell = humanTargetCell;

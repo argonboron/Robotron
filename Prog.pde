@@ -1,5 +1,4 @@
 public class Prog extends Being {
-  final float size = 13; 
 
 
   boolean display() {
@@ -47,6 +46,7 @@ public class Prog extends Being {
   Prog(Cell startCell) {
     alive = true;
     speed = 4.3f;
+    size = 13; 
     velocity = new PVector(0, 0);
     position = startCell.getCentre().copy();
     randomTarget = map.getSpawnCell().getCentre().copy();
@@ -54,13 +54,17 @@ public class Prog extends Being {
       randomTarget = map.getSpawnCell().getCentre().copy();
     }
     acceleration = new PVector(0, 0);
-    target = player.getPosition();
+    target = randomTarget;
     path = getPath(target);
     if (path!=null) {
-      target = path.get(0);
+      if (path.size()>0) {
+        target = path.get(0);
+      }
     } else {
-      path = getPath(player.getPosition());
-      target = path.get(0);
+      path = getPath(randomTarget);
+      if (path.size()>0) {
+        target = path.get(0);
+      }
     }
     targetVel = new PVector(0, 0) ;
   }

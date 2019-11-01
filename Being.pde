@@ -3,7 +3,7 @@ public abstract class Being {
   PVector position, target, velocity, acceleration, targetVel, randomTarget;
   Node goalNode;
   boolean alive, hunt;
-  float orientation, speed;
+  float orientation, speed, size;
   final float ORIENTATION_INCREMENT = PI/32 ;
 
 
@@ -245,6 +245,8 @@ public abstract class Being {
     }
     return -1;
   }
+  
+
 
   ArrayList<Node> getNodeNeighbours(Node node) {
     ArrayList<Node> neighbours = new ArrayList<Node>();

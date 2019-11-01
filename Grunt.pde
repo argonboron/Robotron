@@ -1,5 +1,4 @@
 public class Grunt extends Being  {
-  final float size = 18.5; 
 
 
   boolean display() {
@@ -58,6 +57,7 @@ public class Grunt extends Being  {
 
   Grunt(Cell startCell) {
     alive = true;
+    size = 18.5;
     speed = 3f;
     velocity = new PVector(0, 0);
     position = startCell.getCentre().copy();

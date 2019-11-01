@@ -1,4 +1,4 @@
-import java.util.Stack; //<>// //<>// //<>// //<>//
+import java.util.Stack;  //<>//
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Comparator;
@@ -426,7 +426,8 @@ public class Map {
                 path = true;
                 parentMap.put(neighbourString, current);
               } else {
-                if (map[neighbourX][neighbourY].getType()<3 && !neighbours.contains(neighbourString) && neighbourString != current && !explored.contains(neighbourString)) {
+                if (map[neighbourX][neighbourY].getType()<3 && !neighbours.contains(neighbourString) 
+                && neighbourString != current && !explored.contains(neighbourString)) {
                   neighbours.add(neighbourString); 
                   parentMap.put(neighbourString, current);
                 }
@@ -506,7 +507,9 @@ public class Map {
           int neighbourX = index[0]+xMod;
           int neighbourY = index[1]+yMod;
           if (!(neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
-            if (map[neighbourX][neighbourY].getType() >2 && !isIn(knownObstacles, new int[]{neighbourX, neighbourY}) && diagonalCheck(new int[]{neighbourX, neighbourY}, index)) {
+            if (map[neighbourX][neighbourY].getType() >2 
+          && !isIn(knownObstacles, new int[]{neighbourX, neighbourY}) 
+          && diagonalCheck(new int[]{neighbourX, neighbourY}, index)) {
               neighbours.add(map[neighbourX][neighbourY]);
             }
           }

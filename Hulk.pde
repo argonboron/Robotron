@@ -1,5 +1,4 @@
 public class Hulk extends Being {
-  final float size = 19; 
   int slowTime;
 
 
@@ -54,6 +53,7 @@ public class Hulk extends Being {
   Hulk(Cell startCell) {
     alive = true;
     slowTime = 0;
+    size = 19; 
     speed = 1.7f;
     velocity = new PVector(0, 0);
     position = startCell.getCentre().copy();

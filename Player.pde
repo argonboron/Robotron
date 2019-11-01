@@ -9,7 +9,7 @@ public class Player extends Being {
     velocity.setMag(4);
     position.add(velocity.copy());
     ellipseMode(CENTER);
-    ellipse(position.x, position.y, 18.5, 18.5);
+    ellipse(position.x, position.y, size, size);
     return alive;
   }
   
@@ -64,6 +64,7 @@ public class Player extends Being {
 
   Player(Cell startCell) {
     alive = true;
+    size = 18.5; 
     velocity = new PVector(0, 0);
     acceleration = new PVector(0, 0);
     lives = 3;

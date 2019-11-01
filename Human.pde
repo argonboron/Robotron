@@ -72,9 +72,9 @@ public class Human extends Being {
         targetVel.x = target.x - xe ;
         targetVel.y = target.y - ye ;
       } else if (state == 3) {
-        speed = 3.3f;
-        targetVel.x = xe - target.x;
-        targetVel.y = ye - target.y;
+        speed = 3.6f;
+        targetVel.x = xe - target.x+30;
+        targetVel.y = ye - target.y+30;
       }
     }
     integrate(targetVel) ;

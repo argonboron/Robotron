@@ -7,7 +7,7 @@ public class Obstacle {
   float bottomLeftY;
   float bottomRightX;
   float bottomRightY;
-  
+
   boolean display() {
     fill(240, 90, 79);
     stroke(240, 90, 79);
@@ -15,6 +15,15 @@ public class Obstacle {
     fill(255);
     stroke(0);
     return show;
+  }
+
+  boolean isHittingPlayer() {
+    if (PVector.dist(this.centre, player.getPosition()) < (18.5-5) && !player.invincible) {
+      player.hit();
+      return true;
+    } else {
+      return false;
+    }
   }
 
   void destroy() {
@@ -36,6 +45,6 @@ public class Obstacle {
     bottomLeftY = centreY+6;
     bottomRightX = centreX+6;
     bottomRightY = centreY+6
-    ;
+      ;
   }
 }

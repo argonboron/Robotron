@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-
 Map map;
 Player player;
 ArrayList<Grunt> grunts;
@@ -10,8 +9,9 @@ ArrayList<Brain> brains;
 ArrayList<Prog> progs;
 ArrayList<Obstacle> obstacles;
 ArrayList<PowerUp> powerups;
-int count, invisibleCount, forceCount, invincibleCount;
-boolean forceField;
+int count, invisibleCount, forceCount, invincibleCount, score, level, deadCount, lives;
+int gruntNum, hulkNum, humanNum, brainNum, obstacleNum, invisNum, invincibleNum, forceFieldNum;
+boolean forceField, gameOver;
 
 void setup() {
   size(1000, 1000);
@@ -25,11 +25,30 @@ void setup() {
   obstacles = new ArrayList<Obstacle>();
   powerups = new ArrayList<PowerUp>();
   map = new Map(true);
-  spawn(7, 5, 5, 1, 15, 3, 3, 3);
+  gruntNum = 5;
+  hulkNum = 3;
+  humanNum = 3;
+  lives = 3;
+  brainNum = 0;
+  obstacleNum = 6;
+  forceFieldNum = 1;
+  invisNum = 0;
+  invincibleNum = 0;
+  spawn(gruntNum, humanNum, hulkNum, brainNum, obstacleNum, invincibleNum, forceFieldNum, invisNum);
   count = 0;
+  level = 1;
+  score = 0;
+  gameOver = false;
 }
 
 void draw() {
+  if (grunts.size()==0) {
+    delay(300);
+    nextLevel();
+  }
+  if (deadCount > 0) {
+    deadCount--;
+  }
   if (invisibleCount > 0) {
     invisibleCount--;
   }
@@ -44,6 +63,8 @@ void draw() {
     if (!obstacles.get(i).display()) {
       obstacles.remove(i);
       i--;
+    } else {
+      obstacles.get(i).isHittingPlayer();
     }
   }
   for (int i = 0; i < powerups.size(); i++) {
@@ -52,18 +73,21 @@ void draw() {
       i--;
     }
   }
-  player.display();
   playerColliding(player.getPosition());
   for (int i = 0; i < grunts.size(); i++) {
     if (!grunts.get(i).display()) {
       grunts.remove(i);
       i--;
+    } else {
+      grunts.get(i).isHittingPlayer();
     }
   }
   for (int i = 0; i < hulks.size(); i++) {
     if (!hulks.get(i).display()) {
       hulks.remove(i);
       i--;
+    } else {
+      hulks.get(i).isHittingPlayer();
     }
   }
   for (int i = 0; i < bullets.size(); i++) {
@@ -115,6 +139,7 @@ void draw() {
       brains.remove(i);
       i--;
     } else {
+      brains.get(i).isHittingPlayer();
       float minDist = 1000;
       int minIndex = -1;
       boolean close = false;
@@ -139,9 +164,96 @@ void draw() {
     if (!progs.get(i).display()) {
       progs.remove(i);
       i--;
+    } else {
+      progs.get(i).isHittingPlayer();
     }
   }
+  PFont font = createFont("font.ttf", 28);
+  PFont fontLarge = createFont("font.ttf", 50);
+  textFont(font);
+  fill(20, 53, 163);
+  text("Robotron: 4303", 19, 45);
+  fill(246, 255, 0);
+  text("score: " + Integer.toString(score), 19, 80);
+  fill(36, 237, 89);
+  text("level: " + Integer.toString(level), 19, 120);
+  fill(227, 39, 51);
+  text("lives: " + Integer.toString(lives), 19, 157);
+  fill(255);
+  player.display();
+  if (gameOver) {
+    frameRate(100);
+    lives = 0;
+    int rgb = (int) random(1, 7);
+    if (rgb ==1) {
+      fill(color(200, 0, (int)random(0, 256)));
+    } else if (rgb == 2) {
+      fill(color(200, (int)random(0, 256), 0));
+    } else if (rgb == 3) {
+      fill(color((int)random(0, 256), 0, 200));
+    } else if (rgb == 3) {
+      fill(color(0, (int)random(0, 256), 200));
+    } else if (rgb == 3) {
+      fill(color((int)random(0, 256), 200, 0));
+    } else if (rgb == 3) {
+      fill(color(0, 200, (int)random(0, 256)));
+    }
+    textFont(fontLarge);
+    text("GAME OVER", 310, 500);
+    textFont(font);
+    fill(246, 255, 0);
+    text("score: " + Integer.toString(score), 390, 550);
+    fill(36, 237, 89);
+    text("level: " + Integer.toString(level), 415, 600);
+    fill(252, 3, 207);
+    text("Press any button to play again!", 100, 640);
+    fill(255);
+  }
 } 
+
+void nextLevel() {
+  level++;
+  map = new Map(true);
+  if (sumNums() < 200) {
+    gruntNum++;
+    obstacleNum++;
+    if (level%3==0) {
+      hulkNum++;
+      invincibleNum++;
+    }
+    if (level%4==0) {
+      forceFieldNum++;
+    }
+    if (level%6==0) {
+      brainNum++;
+      invisNum++;
+    }
+  }
+  spawn(gruntNum, humanNum, hulkNum, brainNum, obstacleNum, invincibleNum, forceFieldNum, invisNum);
+}
+
+int sumNums() {
+  return gruntNum + humanNum + hulkNum + brainNum + obstacleNum + invincibleNum + forceFieldNum + invisNum;
+}
+
+void resetLevel() {
+  delay(300);
+  lives--;
+  if (lives > 0) {
+    spawn(gruntNum, humanNum, hulkNum, brainNum, obstacleNum, invincibleNum, forceFieldNum, invisNum);
+  } else {
+    gameOver();
+  }
+}
+
+void gameOver() {
+  gameOver = true;
+  player.go = false;
+}
+
+void addScore(int add) {
+  score += add;
+}
 
 boolean bulletColliding(PVector pos) {
   if ((pos.x < 0 || pos.x > 1000 || pos.y < 0 || pos.y > 1000) || map.pointToCell(pos).getType() < 3) {
@@ -150,18 +262,21 @@ boolean bulletColliding(PVector pos) {
     for (Grunt grunt : grunts) {
       if (PVector.dist(grunt.getPosition(), pos) < (7+grunt.size)) {
         grunt.die();
+        addScore(100);
         return true;
       }
     }
     for (Brain brain : brains) {
       if (PVector.dist(brain.getPosition(), pos) < (7+brain.size)) {
         brain.die();
+        addScore(100);
         return true;
       }
     }
     for (Prog prog : progs) {
       if (PVector.dist(prog.getPosition(), pos) < (7+prog.size)) {
         prog.die();
+        addScore(100);
         return true;
       }
     }
@@ -174,6 +289,7 @@ boolean bulletColliding(PVector pos) {
     for (Obstacle obstacle : obstacles) {
       if (map.pointToCell(pos).getCentre()==obstacle.getCentre()) {
         obstacle.destroy();
+        addScore(50);
         map.removeObstacle(map.pointToIndex(obstacle.getCentre()));
         return true;
       }
@@ -214,7 +330,7 @@ void playerColliding(PVector pos) {
   }
 
   for (int i = 0; i < powerups.size(); i++) {
-    if (powerups.get(i).getCentre().dist(pos)<player.size+1) {
+    if (powerups.get(i).getCentre().dist(pos)<18.5+1) {
       switch(powerups.get(i).getType()) {
       case 1:
         //unoreverse
@@ -239,28 +355,28 @@ void playerColliding(PVector pos) {
     }
   }
   for (Grunt grunt : grunts) {
-    if (player.hasForceField() && PVector.dist(grunt.getPosition(), pos) < 30+(grunt.size-1+player.size)) {
+    if (player.hasForceField() && PVector.dist(grunt.getPosition(), pos) < 30+(grunt.size-1+18.5)) {
       grunt.forceField(true);
     } else {
       grunt.forceField(false);
     }
   }
   for (Prog prog : progs) {
-    if (player.hasForceField() && PVector.dist(prog.getPosition(), pos) < 30+(prog.size-1+player.size)) {
+    if (player.hasForceField() && PVector.dist(prog.getPosition(), pos) < 30+(prog.size-1+18.5)) {
       prog.forceField(true);
     } else {
       prog.forceField(false);
     }
   }
   for (Hulk hulk : hulks) {
-    if (player.hasForceField() && PVector.dist(hulk.getPosition(), pos) < 30+(hulk.size-1+player.size)) {
+    if (player.hasForceField() && PVector.dist(hulk.getPosition(), pos) < 30+(hulk.size-1+18.5)) {
       hulk.forceField(true);
     } else {
       hulk.forceField(false);
     }
   }
   for (Brain brain : brains) {
-    if (player.hasForceField() && PVector.dist(brain.getPosition(), pos) < 30+(brain.size-3+player.size)) {
+    if (player.hasForceField() && PVector.dist(brain.getPosition(), pos) < 30+(brain.size-3+18.5)) {
       brain.forceField(true);
     } else {
       brain.forceField(false);
@@ -268,28 +384,33 @@ void playerColliding(PVector pos) {
   }
   if (player.isInvincible()) {
     for (Grunt grunt : grunts) {
-      if (PVector.dist(grunt.getPosition(), pos) < (grunt.size-1+player.size)) {
+      if (PVector.dist(grunt.getPosition(), pos) < (grunt.size-1+18.5)) {
         grunt.die();
+        addScore(100);
       }
     }
     for (Prog prog : progs) {
-      if (PVector.dist(prog.getPosition(), pos) < (prog.size-1+player.size)) {
+      if (PVector.dist(prog.getPosition(), pos) < (prog.size-1+18.5)) {
         prog.die();
+        addScore(100);
       }
     }
     for (Hulk hulk : hulks) {
-      if (PVector.dist(hulk.getPosition(), pos) < (hulk.size-1+player.size)) {
+      if (PVector.dist(hulk.getPosition(), pos) < (hulk.size-1+18.5)) {
         hulk.die();
+        addScore(100);
       }
     }
     for (Brain brain : brains) {
-      if (PVector.dist(brain.getPosition(), pos) < (brain.size-3+player.size)) {
+      if (PVector.dist(brain.getPosition(), pos) < (brain.size-3+18.5)) {
         brain.die();
+        addScore(100);
       }
     }
     for (Obstacle obstacle : obstacles) {
       if (map.pointToCell(pos).getCentre()==obstacle.getCentre()) {
         obstacle.destroy();
+        addScore(50);
         map.removeObstacle(map.pointToIndex(obstacle.getCentre()));
       }
     }
@@ -310,47 +431,39 @@ void spawn(int gruntNum, int humanNum, int hulkNum, int brainNum, int obstacleNu
   progs.clear();
   obstacles.clear();
   powerups.clear();
-  player = new Player(map.getSpawnCell());
+  player = new Player(map.getSpawnCell(true));
+  int humanType = 0;
   for (int i = 0; i < gruntNum; i++) {
-    grunts.add(new Grunt(map.getSpawnCell()));
+    grunts.add(new Grunt(map.getSpawnCell(false)));
   }  
   for (int i = 0; i < humanNum; i++) {
-    humans.add(new Human(map.getSpawnCell()));
+    humanType = (humanType%3)+1;
+    humans.add(new Human(map.getSpawnCell(false), humanType));
   }
   for (int i = 0; i < hulkNum; i++) {
-    hulks.add(new Hulk(map.getSpawnCell()));
+    hulks.add(new Hulk(map.getSpawnCell(false)));
   }
   for (int i = 0; i < brainNum; i++) {
-    brains.add(new Brain(map.getSpawnCell(), null));
+    brains.add(new Brain(map.getSpawnCell(false), null));
   }
   for (int i = 0; i < deathTouch; i++) {
-    powerups.add(new PowerUp(map.getSpawnCell(), 1));
+    powerups.add(new PowerUp(map.getSpawnCell(false), 1));
   }
   for (int i = 0; i < forceField; i++) {
-    powerups.add(new PowerUp(map.getSpawnCell(), 2));
+    powerups.add(new PowerUp(map.getSpawnCell(false), 2));
   }
   for (int i = 0; i < invisibility; i++) {
-    powerups.add(new PowerUp(map.getSpawnCell(), 3));
+    powerups.add(new PowerUp(map.getSpawnCell(false), 3));
   }
   for (int i = 0; i < obstacleNum; i++) {
-    Cell randomCell = map.getSpawnCell();
+    Cell randomCell = map.getSpawnCell(false);
     obstacles.add(new Obstacle(randomCell));
     map.addObstacle(map.pointToIndex(randomCell.getCentre()));
   }
 }
 
 void keyPressed() {
-  if (key == '1') {
-    map = new Map(false);
-  } else if (key == '2') {
-    for (int i = 0; i < 10; i++) {
-      map.step();
-    }
-  } else if (key =='3') {
-    map.mapMasses();
-  } else if (key == '4') {
-    map.mergeMasses();
-  } else if (key == 'w') {
+  if (key == 'w') {
     player.move(0);
   } else if (key == 's') {
     player.move(1);
@@ -358,24 +471,27 @@ void keyPressed() {
     player.move(2);
   } else if (key == 'd') {
     player.move(3);
-  } else {
-    map = new Map(true);
-    spawn(7, 5, 5, 1, 15, 2, 2, 2);
   }
 }
 
 void keyReleased() {
-  if (key == 'w') {
-    player.stop(0);
-  } else if (key == 's') {
-    player.stop(1);
-  } else if (key == 'a') {
-    player.stop(2);
-  } else if (key == 'd') {
-    player.stop(3);
+  if (gameOver) {
+    setup();
+  } else {
+    if (key == 'w') {
+      player.stop(0);
+    } else if (key == 's') {
+      player.stop(1);
+    } else if (key == 'a') {
+      player.stop(2);
+    } else if (key == 'd') {
+      player.stop(3);
+    }
   }
 }
 
 void mousePressed() {
-  bullets.add(new Bullet(player.getPosition(), new PVector(mouseX, mouseY)));
+  if (player.go) {
+    bullets.add(new Bullet(player.getPosition(), new PVector(mouseX, mouseY)));
+  }
 }

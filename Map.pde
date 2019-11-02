@@ -1,4 +1,4 @@
-import java.util.Stack;  //<>//
+import java.util.Stack;  //<>// //<>//
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Comparator;
@@ -13,6 +13,7 @@ public class Map {
   int MAP_SIZE = 50;
   int DEATH_NUM = 4;
   int BIRTH_NUM = 4;
+  boolean boss;
 
   void generate() {
     knownObstacles.clear();
@@ -31,15 +32,21 @@ public class Map {
     }
   }
 
-  Cell getSpawnCell() {
+  Cell getSpawnCell(boolean playerCall) {
     Cell cell = null;
     int x = 0;
     int y = 0;
     while (cell==null) {
       x = (int) random(0, MAP_SIZE);
       y = (int) random(0, MAP_SIZE);
-      if (map[x][y].getType() > 2 && !isIn(knownObstacles, new int[]{x, y}) && !isIn(spawnPositions, new int[]{x, y})) {
-        cell = map[x][y];
+      if (playerCall) {
+        if (map[x][y].getType() > 2 && !isIn(knownObstacles, new int[]{x, y}) && !isIn(spawnPositions, new int[]{x, y})) {
+          cell = map[x][y];
+        }
+      } else {
+        if (map[x][y].getType() > 2 && !isIn(knownObstacles, new int[]{x, y}) && !isIn(spawnPositions, new int[]{x, y}) && !isIn(getNeighboursIndex(pointToIndex(player.position)), new int[]{x, y})) {
+          cell = map[x][y];
+        }
       }
     }
     spawnPositions.add(new int[]{x, y});
@@ -54,11 +61,11 @@ public class Map {
     }
     return false;
   }
-  
+
   void addObstacle(int[] index) {
     knownObstacles.add(index);
   }
-  
+
   void removeObstacle(int[] index) {
     knownObstacles.remove(index);
   }
@@ -91,10 +98,14 @@ public class Map {
     map = new Cell[MAP_SIZE][MAP_SIZE];
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
-        if (random(0, 100) < 45.5) {
-          map[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10), x, y);
-        } else {
+        if (boss) {
           map[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10), x, y);
+        } else {
+          if (random(0, 100) < 45.5) {
+            map[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10), x, y);
+          } else {
+            map[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10), x, y);
+          }
         }
       }
     }
@@ -427,7 +438,7 @@ public class Map {
                 parentMap.put(neighbourString, current);
               } else {
                 if (map[neighbourX][neighbourY].getType()<3 && !neighbours.contains(neighbourString) 
-                && neighbourString != current && !explored.contains(neighbourString)) {
+                  && neighbourString != current && !explored.contains(neighbourString)) {
                   neighbours.add(neighbourString); 
                   parentMap.put(neighbourString, current);
                 }
@@ -508,8 +519,27 @@ public class Map {
           int neighbourY = index[1]+yMod;
           if (!(neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
             if (map[neighbourX][neighbourY].getType() >2 
-          && diagonalCheck(new int[]{neighbourX, neighbourY}, index)) {
+              && diagonalCheck(new int[]{neighbourX, neighbourY}, index)) {
               neighbours.add(map[neighbourX][neighbourY]);
+            }
+          }
+        }
+      }
+    }
+    return neighbours;
+  }
+  
+    ArrayList<int[]> getNeighboursIndex (int[] index) {
+    ArrayList<int[]> neighbours = new ArrayList<int[]>();
+    for (int xMod = -1; xMod < 2; xMod++) {
+      for (int yMod = -1; yMod < 2; yMod++) {
+        if (!(xMod == 0 && yMod == 0)) {
+          int neighbourX = index[0]+xMod;
+          int neighbourY = index[1]+yMod;
+          if (!(neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
+            if (map[neighbourX][neighbourY].getType() >2 
+              && diagonalCheck(new int[]{neighbourX, neighbourY}, index)) {
+              neighbours.add(new int[]{neighbourX, neighbourY});
             }
           }
         }

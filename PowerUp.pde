@@ -11,7 +11,7 @@ public class PowerUp {
       //uno reverse
       fill(252, 198, 3);
       stroke(252, 198, 3);
-      rect(shapeX, shapeY, 10, 10, 8);
+      rect(shapeX, shapeY, 10, 10, 3);
       fill(255);
       stroke(0);
       break;
@@ -19,7 +19,7 @@ public class PowerUp {
       //force field
       fill(103, 3, 252);
       stroke(103, 3, 252);
-      rect(shapeX, shapeY, 10, 10, 8);
+      rect(shapeX, shapeY, 10, 10, 3);
       fill(255);
       stroke(0);
       break;
@@ -27,7 +27,7 @@ public class PowerUp {
       //invisibility
       fill(255);
       stroke(255);
-      rect(shapeX, shapeY, 10, 10, 8);
+      rect(shapeX, shapeY, 10, 10, 3);
       fill(255);
       stroke(0);
       break;

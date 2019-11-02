@@ -2,6 +2,7 @@ public class Brain extends Robot {
   Cell targetCell;
 
   boolean display() {
+    setGo();
     float xe = position.x, ye = position.y ;
     fill(30, 255, 0) ;
     ellipse(xe, ye, size, size) ;
@@ -27,7 +28,7 @@ public class Brain extends Robot {
             path = getPath(targetCell.getCentre());
           }
         } else {
-          path = getPath(map.getSpawnCell().getCentre());
+          path = getPath(map.getSpawnCell(false).getCentre());
         }
         if (path != null) {
           if (path.size()>1) {
@@ -42,7 +43,7 @@ public class Brain extends Robot {
             target = followPath();
           } else {
             while (map.pointToCell(randomTarget).getCentre() == map.pointToCell(position).getCentre()) {
-              randomTarget = map.getSpawnCell().getCentre().copy();
+              randomTarget = map.getSpawnCell(false).getCentre().copy();
             }
             target = randomTarget;
             path = getPath(target);
@@ -65,9 +66,9 @@ public class Brain extends Robot {
     velocity = new PVector(0, 0);
     position = startCell.getCentre().copy();
     targetCell = humanTargetCell;
-    randomTarget = map.getSpawnCell().getCentre().copy();
+    randomTarget = map.getSpawnCell(false).getCentre().copy();
     while (map.pointToCell(randomTarget).getCentre() == map.pointToCell(position).getCentre()) {
-      randomTarget = map.getSpawnCell().getCentre().copy();
+      randomTarget = map.getSpawnCell(false).getCentre().copy();
     }
     acceleration = new PVector(0, 0);
     hunt = targetCell != null;
@@ -80,9 +81,10 @@ public class Brain extends Robot {
     if (path!=null) {
       target = path.get(0);
     } else {
-      path = getPath(map.getSpawnCell().getCentre());
+      path = getPath(map.getSpawnCell(false).getCentre());
       target = path.get(0);
     }
     targetVel = new PVector(0, 0) ;
+    go = false;
   }
 }

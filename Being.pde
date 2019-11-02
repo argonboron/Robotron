@@ -2,52 +2,54 @@ public abstract class Being {
   ArrayList<PVector> path = new ArrayList<PVector>();
   PVector position, target, velocity, acceleration, targetVel, randomTarget;
   Node goalNode;
-  boolean alive, hunt;
+  boolean alive, hunt, go;
   float orientation, speed, size;
   final float ORIENTATION_INCREMENT = PI/32 ;
 
 
   void integrate(PVector targetVel) {
-    velocity = targetVel;
-    velocity.normalize() ;
-    velocity.mult(speed) ;
-    collisionCheck(false);
-    position.add(velocity) ;
-    if ((position.x < 0) || (position.x > 1000)) {
-      velocity.x = -velocity.x;
-    }
-    if ((position.y < 0) || (position.y > 1000)) {
-      velocity.y = -velocity.y;
-    }
-    float targetOrientation = atan2(velocity.y, velocity.x) ;
-    if (abs(targetOrientation - orientation) <= ORIENTATION_INCREMENT) {
-      orientation = targetOrientation ;
-      return ;
-    }
-    if (targetOrientation < orientation) {
-      if (orientation - targetOrientation < PI) {
-        orientation -= ORIENTATION_INCREMENT;
-      } else {
-        orientation += ORIENTATION_INCREMENT;
+    if (go) {
+      velocity = targetVel;
+      velocity.normalize() ;
+      velocity.mult(speed) ;
+      collisionCheck(false);
+      position.add(velocity) ;
+      if ((position.x < 0) || (position.x > 1000)) {
+        velocity.x = -velocity.x;
       }
-    } else {
-      if (targetOrientation - orientation < PI) {
-        orientation += ORIENTATION_INCREMENT;
-      } else {
-        orientation -= ORIENTATION_INCREMENT;
+      if ((position.y < 0) || (position.y > 1000)) {
+        velocity.y = -velocity.y;
       }
-    }
-    if (orientation > PI) {
-      orientation -= 2*PI;
-    } else if (orientation < -PI) {
-      orientation += 2*PI ;
+      float targetOrientation = atan2(velocity.y, velocity.x) ;
+      if (abs(targetOrientation - orientation) <= ORIENTATION_INCREMENT) {
+        orientation = targetOrientation ;
+        return ;
+      }
+      if (targetOrientation < orientation) {
+        if (orientation - targetOrientation < PI) {
+          orientation -= ORIENTATION_INCREMENT;
+        } else {
+          orientation += ORIENTATION_INCREMENT;
+        }
+      } else {
+        if (targetOrientation - orientation < PI) {
+          orientation += ORIENTATION_INCREMENT;
+        } else {
+          orientation -= ORIENTATION_INCREMENT;
+        }
+      }
+      if (orientation > PI) {
+        orientation -= 2*PI;
+      } else if (orientation < -PI) {
+        orientation += 2*PI ;
+      }
     }
   }
 
   void die() {
     alive = false;
   }
-  
+
   PVector getPosition() {
     return this.position.copy();
   }
@@ -245,7 +247,7 @@ public abstract class Being {
     }
     return -1;
   }
-  
+
 
 
   ArrayList<Node> getNodeNeighbours(Node node) {

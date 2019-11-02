@@ -1,6 +1,7 @@
 public class Prog extends Robot {
 
   boolean display() {
+    setGo();
     float xe = position.x, ye = position.y ;
     fill(0, 0, 0) ;
     stroke(255) ;
@@ -17,7 +18,7 @@ public class Prog extends Robot {
       targetVel.x = xe - target.x+30;
       targetVel.y = ye - target.y+30;
       integrate(targetVel) ;
-            target = player.getPosition();
+      target = player.getPosition();
     } else if (!player.isInvisible()) {
       targetVel.x = target.x - xe ;
       targetVel.y = target.y - ye ;
@@ -45,7 +46,7 @@ public class Prog extends Robot {
           target = followPath();
         } else {
           while (map.pointToCell(randomTarget).getCentre() == map.pointToCell(position).getCentre()) {
-            randomTarget = map.getSpawnCell().getCentre().copy();
+            randomTarget = map.getSpawnCell(false).getCentre().copy();
           }
           target = randomTarget;
           path = getPath(target);
@@ -59,12 +60,13 @@ public class Prog extends Robot {
   Prog(Cell startCell) {
     alive = true;
     speed = 4.3f;
+    go = false;
     size = 13; 
     velocity = new PVector(0, 0);
     position = startCell.getCentre().copy();
-    randomTarget = map.getSpawnCell().getCentre().copy();
+    randomTarget = map.getSpawnCell(false).getCentre().copy();
     while (map.pointToCell(randomTarget).getCentre() == map.pointToCell(position).getCentre()) {
-      randomTarget = map.getSpawnCell().getCentre().copy();
+      randomTarget = map.getSpawnCell(false).getCentre().copy();
     }
     acceleration = new PVector(0, 0);
     target = randomTarget;

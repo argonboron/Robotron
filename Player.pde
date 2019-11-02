@@ -1,14 +1,46 @@
 public class Player extends Being {
-  int lives;
-  int score;
+  int score, startCount, opNum;
   boolean invincible, forceField, invisible;
 
   boolean display() {
+
     alive = lives > 0;
     velocity.add(acceleration.copy());
     collisionCheck(true);
     velocity.setMag(speed);
     position.add(velocity.copy());
+    if (size >18.6) {
+      if (size < 30) {
+        if (size<21) {
+          size = size-0.2;
+        } else {
+          size--;
+        }
+      } else if (size > 600) {
+        size=size-15;
+      } else {
+        size=size-25;
+      }
+    } else if (size > 18.5 && size < 18.6) {
+      startCount = 450;
+      size = 18.5;
+      opNum = 60;
+    } else {
+      if (startCount > 0) {
+        if (startCount > 200) {
+          ellipseMode(CENTER);
+          fill(150, opNum);
+          stroke(150, opNum);
+          ellipse(position.x, position.y, 480 - startCount, 480 - startCount);
+          stroke(0);
+          opNum--;
+        }
+        startCount = startCount-5;
+        go = false;
+      } else if (!gameOver){
+        go = true;
+      }
+    }
     if (forceField) {
       fill(color(103, 3, 252), 50);
       stroke(103, 3, 252, 50);
@@ -67,6 +99,17 @@ public class Player extends Being {
 
   void gotHuman(int type) {
     //implement scoring
+    switch (type) {
+    case 1:
+      addScore(100);
+      break;
+    case 2:
+      addScore(150);
+      break;
+    case 3:
+      addScore(200);
+      break;
+    }
   }
 
   boolean isMoving() {
@@ -84,7 +127,7 @@ public class Player extends Being {
   }
 
   void hit() {
-    lives--;
+    resetLevel();
   }
 
   void stop(int dir) {
@@ -109,17 +152,19 @@ public class Player extends Being {
   }
 
   void move(int dir) {
-    if (dir < 2 && abs(velocity.y) == 0 && abs(acceleration.y) == 0) {
-      if (dir ==0) {
-        acceleration.add(new PVector(0, -speed));
-      } else {
-        acceleration.add(new PVector(0, speed));
-      }
-    } else if (abs(velocity.x) == 0 && abs(acceleration.x) == 0) {
-      if (dir ==2) {
-        acceleration.add(new PVector(-speed, 0));
-      } else if (dir == 3) {
-        acceleration.add(new PVector(speed, 0));
+    if (go) {
+      if (dir < 2 && abs(velocity.y) == 0 && abs(acceleration.y) == 0) {
+        if (dir ==0) {
+          acceleration.add(new PVector(0, -speed));
+        } else {
+          acceleration.add(new PVector(0, speed));
+        }
+      } else if (abs(velocity.x) == 0 && abs(acceleration.x) == 0) {
+        if (dir ==2) {
+          acceleration.add(new PVector(-speed, 0));
+        } else if (dir == 3) {
+          acceleration.add(new PVector(speed, 0));
+        }
       }
     }
   }
@@ -128,12 +173,12 @@ public class Player extends Being {
     speed = 4;
     alive = true;
     invisible = false;
+    go = false;
     forceField = false;
     invincible = false;
-    size = 18.5; 
+    size = 1000; 
     velocity = new PVector(0, 0);
     acceleration = new PVector(0, 0);
-    lives = 3;
     position = startCell.getCentre().copy();
   }
 }

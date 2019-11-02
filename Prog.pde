@@ -1,16 +1,6 @@
-public class Prog extends Being {
-
+public class Prog extends Robot {
 
   boolean display() {
-    //Draw A* path
-    //if (path!=null) {
-    //  for (int i = 1; i < path.size(); i++) {
-    //    stroke(color(0, 255, 255));
-    //    fill(color(0, 255, 255));
-    //    line(path.get(i-1).x, path.get(i-1).y, path.get(i).x, path.get(i).y);
-    //    stroke(0);
-    //  }
-    //}
     float xe = position.x, ye = position.y ;
     fill(0, 0, 0) ;
     stroke(255) ;
@@ -21,22 +11,45 @@ public class Prog extends Being {
     fill(255);
     ellipse(newxe, newye, 5.5, 5.5) ;  
     fill(255);
-    targetVel.x = target.x - xe ;
-    targetVel.y = target.y - ye ;
-    integrate(targetVel) ;
-    hunt = (player.getPosition().dist(position)<175);
-    if (path != null) {
-      if (map.pointToCell(player.getPosition()).getCentre() != map.pointToCell(path.get(path.size()-1)).getCentre()) {
-        path = getPath(map.pointToCell(player.getPosition()).getCentre());
+    if (flee) {
+      target = player.getPosition();
+      speed = 3.6f;
+      targetVel.x = xe - target.x+30;
+      targetVel.y = ye - target.y+30;
+      integrate(targetVel) ;
+            target = player.getPosition();
+    } else if (!player.isInvisible()) {
+      targetVel.x = target.x - xe ;
+      targetVel.y = target.y - ye ;
+      integrate(targetVel) ;
+      if (path != null) {
+        if (map.pointToCell(player.getPosition()).getCentre() != map.pointToCell(path.get(path.size()-1)).getCentre()) {
+          path = getPath(map.pointToCell(player.getPosition()).getCentre());
+        }
+      } else {
+        path = getPath(player.getPosition());
+      }
+      if (path != null) {
+        if (path.size()>1) {
+          target = followPath();
+        } else {
+          target = player.getPosition();
+        }
       }
     } else {
-      path = getPath(player.getPosition());
-    }
-    if (path != null) {
-      if (path.size()>1) {
-        target = followPath();
-      } else {
-        target = player.getPosition();
+      targetVel.x = target.x - xe ;
+      targetVel.y = target.y - ye ;
+      integrate(targetVel) ;
+      if (path != null) {
+        if (path.size()>1) {
+          target = followPath();
+        } else {
+          while (map.pointToCell(randomTarget).getCentre() == map.pointToCell(position).getCentre()) {
+            randomTarget = map.getSpawnCell().getCentre().copy();
+          }
+          target = randomTarget;
+          path = getPath(target);
+        }
       }
     }
     return this.alive;

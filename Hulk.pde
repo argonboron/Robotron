@@ -1,17 +1,8 @@
-public class Hulk extends Being {
+public class Hulk extends Robot {
   int slowTime;
 
 
   boolean display() {
-    //Draw A* path
-    //if (path!=null) {
-    //  for (int i = 1; i < path.size(); i++) {
-    //    stroke(color(0, 255, 255));
-    //    fill(color(0, 255, 255));
-    //    line(path.get(i-1).x, path.get(i-1).y, path.get(i).x, path.get(i).y);
-    //    stroke(0);
-    //  }
-    //}
     if (slowTime > 0) {
       if (slowTime == 1) {
         speed = 1.7f;
@@ -26,24 +17,32 @@ public class Hulk extends Being {
     fill(255, 255, 0);
     ellipse(newxe, newye, 5.5, 5.5) ;  
     fill(255);
-
-    targetVel.x = target.x - xe ;
-    targetVel.y = target.y - ye ;
-    integrate(targetVel) ;
-    if (path != null) {
-      if (path.size()>1) {
-        target = followPath();
-      } else {
-        while (map.pointToCell(randomTarget).getCentre() == map.pointToCell(position).getCentre()) {
-          randomTarget = map.getSpawnCell().getCentre().copy();
+    if (flee) {
+      target = player.getPosition();
+      speed = 3.6f;
+      targetVel.x = xe - target.x+30;
+      targetVel.y = ye - target.y+30;
+      integrate(targetVel) ;
+      target = followPath();
+    } else {
+      targetVel.x = target.x - xe ;
+      targetVel.y = target.y - ye ;
+      integrate(targetVel) ;
+      if (path != null) {
+        if (path.size()>1) {
+          target = followPath();
+        } else {
+          while (map.pointToCell(randomTarget).getCentre() == map.pointToCell(position).getCentre()) {
+            randomTarget = map.getSpawnCell().getCentre().copy();
+          }
+          target = randomTarget;
+          path = getPath(target);
         }
-        target = randomTarget;
-        path = getPath(target);
       }
     }
     return this.alive;
   }
-  
+
   void hit() {
     speed = 0.5f;
     slowTime = 15;

@@ -20,15 +20,6 @@ public class Human extends Being {
   }
 
   boolean display() {
-
-    //if (path!=null) {
-    //  for (int i = 1; i < path.size(); i++) {
-    //    stroke(color(255, 255, 255));
-    //    fill(color(0, 255, 255));
-    //    line(path.get(i-1).x, path.get(i-1).y, path.get(i).x, path.get(i).y);
-    //    stroke(0);
-    //  }
-    //}
     float xe = position.x, ye = position.y ;
     // Show orientation
     switch(type) {

@@ -508,7 +508,6 @@ public class Map {
           int neighbourY = index[1]+yMod;
           if (!(neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
             if (map[neighbourX][neighbourY].getType() >2 
-          && !isIn(knownObstacles, new int[]{neighbourX, neighbourY}) 
           && diagonalCheck(new int[]{neighbourX, neighbourY}, index)) {
               neighbours.add(map[neighbourX][neighbourY]);
             }

@@ -1,6 +1,6 @@
 public class Player extends Being {
   int score, startCount, opNum;
-  boolean invincible, forceField, invisible;
+  boolean invincible, forceField, invisible, started;
 
   boolean display() {
 
@@ -22,6 +22,7 @@ public class Player extends Being {
         size=size-25;
       }
     } else if (size > 18.5 && size < 18.6) {
+      spawn.stop();
       startCount = 450;
       size = 18.5;
       opNum = 60;
@@ -37,8 +38,10 @@ public class Player extends Being {
         }
         startCount = startCount-5;
         go = false;
-      } else if (!gameOver){
+      } else if (!gameOver &&! started){
         go = true;
+        start.play();
+        started = true;
       }
     }
     if (forceField) {
@@ -98,7 +101,7 @@ public class Player extends Being {
   }
 
   void gotHuman(int type) {
-    //implement scoring
+    humansave.play();
     switch (type) {
     case 1:
       addScore(100);
@@ -176,6 +179,7 @@ public class Player extends Being {
     go = false;
     forceField = false;
     invincible = false;
+    started = false;
     size = 1000; 
     velocity = new PVector(0, 0);
     acceleration = new PVector(0, 0);

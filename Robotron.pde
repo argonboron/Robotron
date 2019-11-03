@@ -267,24 +267,24 @@ void resetLevel() {
 
 //Setup sounds
 void setupSound() {
-  //https://freesound.org/people/michorvath/sounds/412344/
+  //https://freesound.org/people/Romariogrande/sounds/452138/
   path = sketchPath("sounds/bg.wav");
   background = new SoundFile(this, path);
   background.amp(0.2);
-  //https://freesound.org/people/Leszek_Szary/sounds/146730/
+  //https://freesound.org/people/cablique/sounds/152766/
   path = sketchPath("sounds/shoot.wav");
   shoot = new SoundFile(this, path);
-  //https://freesound.org/people/OwlStorm/sounds/404754/
+  //https://freesound.org/people/ebcrosby/sounds/333496/
   path = sketchPath("sounds/robotdie.wav");
   robotdie = new SoundFile(this, path);
   robotdie.amp(0.2);
   //https://freesound.org/people/mitchelk/sounds/136765/
   path = sketchPath("sounds/humansave.wav");
   humansave = new SoundFile(this, path);
-  //https://freesound.org/people/alanmcki/sounds/400580/
+  //https://freesound.org/people/estlacksensory/sounds/118708/
   path = sketchPath("sounds/nextlevel.wav");
   nextlevel = new SoundFile(this, path);
-  //https://freesound.org/people/Timbre/sounds/376493/
+  //https://freesound.org/people/freedomfightervictor/sounds/390531/
   path = sketchPath("sounds/spawn.wav");
   spawn = new SoundFile(this, path);
   spawn.amp(0.3);
@@ -292,16 +292,16 @@ void setupSound() {
   path = sketchPath("sounds/start.wav");
   start = new SoundFile(this, path);
   start.amp(0.4);
-  //https://freesound.org/people/ScreamStudio/sounds/412168/
+  //https://freesound.org/people/briccio/sounds/318807/
   path = sketchPath("sounds/endscreen.wav");
   endscreen = new SoundFile(this, path);
-  //https://freesound.org/people/ScreamStudio/sounds/412168/
+  //https://freesound.org/people/Mrthenoronha/sounds/395636/
   path = sketchPath("sounds/prog.wav");
-  prog = new SoundFile(this, path);
-  //https://freesound.org/people/ScreamStudio/sounds/412168/
+  prog = new SoundFile(this, path);https:
+  //freesound.org/people/josepharaoh99/sounds/364929/
   path = sketchPath("sounds/die.mp3");
   die = new SoundFile(this, path);
-  //https://freesound.org/people/ScreamStudio/sounds/412168/
+  //freesound.org/people/ProjectsU012/sounds/360978/
   path = sketchPath("sounds/powerup.wav");
   powerup = new SoundFile(this, path);
 

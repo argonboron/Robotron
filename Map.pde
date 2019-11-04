@@ -1,4 +1,4 @@
-import java.util.Stack;  //<>//
+import java.util.Stack;  //<>// //<>//
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Comparator;
@@ -10,14 +10,16 @@ public class Map {
   ArrayList<int[]> knownObstacles = new ArrayList<int[]>();
   ArrayList<int[]> spawnPositions = new ArrayList<int[]>();
   Cell[][] map;
-  int MAP_SIZE = 50;
-  int DEATH_NUM = 4;
-  int BIRTH_NUM = 4;
+  final int MAP_SIZE = 50;
+  final int DEATH_NUM = 4;
+  final int BIRTH_NUM = 4;
+  boolean boss;
 
+  //Procedural generation of game map
   void generate() {
     knownObstacles.clear();
     spawnPositions.clear();
-    initMap();
+    initMap(false);
     for (int i = 0; i < 10; i++) {
       step();
     }
@@ -31,21 +33,34 @@ public class Map {
     }
   }
 
-  Cell getSpawnCell() {
+  //Generate dead map
+  void generateBoss() {
+    initMap(true);
+  }
+
+  //Return random cell which is walkable, not already got somethign on it, and not directly next to player
+  Cell getSpawnCell(boolean playerCall) {
     Cell cell = null;
     int x = 0;
     int y = 0;
     while (cell==null) {
       x = (int) random(0, MAP_SIZE);
       y = (int) random(0, MAP_SIZE);
-      if (map[x][y].getType() > 2 && !isIn(knownObstacles, new int[]{x, y}) && !isIn(spawnPositions, new int[]{x, y})) {
-        cell = map[x][y];
+      if (playerCall) {
+        if (map[x][y].getType() > 2 && !isIn(knownObstacles, new int[]{x, y}) && !isIn(spawnPositions, new int[]{x, y})) {
+          cell = map[x][y];
+        }
+      } else {
+        if (map[x][y].getType() > 2 && !isIn(knownObstacles, new int[]{x, y}) && !isIn(spawnPositions, new int[]{x, y}) && !isIn(getNeighboursIndex(pointToIndex(player.position)), new int[]{x, y})) {
+          cell = map[x][y];
+        }
       }
     }
     spawnPositions.add(new int[]{x, y});
     return cell;
   }
 
+  //Check if int[] is in an arraylist of int[]s
   public boolean isIn(ArrayList<int[]> map, int[] coords) {
     for (int[] coord : map) {
       if (Arrays.equals(coord, coords)) {
@@ -54,15 +69,18 @@ public class Map {
     }
     return false;
   }
-  
+
+  //add obstacles
   void addObstacle(int[] index) {
     knownObstacles.add(index);
   }
-  
+
+  //remove obstacles
   void removeObstacle(int[] index) {
     knownObstacles.remove(index);
   }
 
+  //Apply cell laws
   void step() {
     Cell[][] newMap = new Cell[MAP_SIZE][MAP_SIZE]; 
     for (int x = 0; x < MAP_SIZE; x++) {
@@ -87,19 +105,25 @@ public class Map {
     display();
   }
 
-  void initMap() {
+  //Initialise may with random dead or alive cells
+  void initMap(boolean boss) {
     map = new Cell[MAP_SIZE][MAP_SIZE];
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
-        if (random(0, 100) < 45.5) {
-          map[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10), x, y);
-        } else {
+        if (boss) {
           map[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10), x, y);
+        } else {
+          if (random(0, 100) < 45.5) {
+            map[x][y] = new Cell(1, ((x*20)+10), ((y*20)+10), x, y);
+          } else {
+            map[x][y] = new Cell(3, ((x*20)+10), ((y*20)+10), x, y);
+          }
         }
       }
     }
   }
 
+  //Given a PVector, return the cell that contains it (or nearest if on line)
   Cell pointToCell(PVector point) {
     Cell returnCell = null;
     for (int x = 0; x < MAP_SIZE; x++) {
@@ -124,6 +148,7 @@ public class Map {
     return returnCell;
   }
 
+  //Given a PVector, return the insex of the cell that ocntains it
   int[] pointToIndex(PVector point) {
     int[] returnIndex = null;
     for (int x = 0; x < MAP_SIZE; x++) {
@@ -137,7 +162,6 @@ public class Map {
     while (returnIndex == null) {
       float add  = (random(-num, num));
       num= num+8;
-
       for (int x = 0; x < MAP_SIZE; x++) {
         for (int y = 0; y < MAP_SIZE; y++) {
           if (map[x][y].isInside(point.copy().add(add, add))) {
@@ -149,6 +173,7 @@ public class Map {
     return returnIndex;
   }
 
+  //Check collisions against wall
   boolean isHittingWall(PVector point, String dir, boolean isPlayer) {
     int[] index = pointToIndex(point.copy());
     float checkSize = 0;
@@ -249,7 +274,7 @@ public class Map {
     return false;
   }
 
-
+  //Return number of neighbours that are alive
   int countLivingNeighbours(int x, int y) {
     int count = 0;
     for (int xMod = -1; xMod < 2; xMod++) {
@@ -282,9 +307,6 @@ public class Map {
         } else {
           if (map[x][y].getType()==3) {
             cell.setFill(10);
-          } else {
-            color c = getMassColour(map[x][y].getType());
-            cell.setFill(c);
           }
         }
         shape(cell);
@@ -292,16 +314,7 @@ public class Map {
     }
   }
 
-  void resetColours() {
-    for (int x = 0; x < MAP_SIZE; x++) {
-      for (int y = 0; y < MAP_SIZE; y++) {
-        if (map[x][y].getType()>3) {
-          map[x][y].setType(3);
-        }
-      }
-    }
-  }
-
+  //Use flood fill to map masses
   void mapMasses() {
     masses.clear();
     clearMasses();
@@ -316,6 +329,7 @@ public class Map {
     }
   }
 
+  //Reset mass ids
   void clearMasses() {
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
@@ -326,27 +340,7 @@ public class Map {
     }
   }
 
-  color getMassColour(int num) {
-    switch(num) {
-    case 4:
-      return color(10, 10, 50);
-    case 5:
-      return color (50, 10, 10);
-    case 6:
-      return color(10, 50, 10);
-    case 7:
-      return color (50, 50, 10);
-    case 8:
-      return color (50, 10, 50);
-    case 9:
-      return color (10, 50, 50);
-    case 10:
-      return color (50, 50, 50);
-    default:
-      return color(random(10, 60), random(10, 60), random(10, 60));
-    }
-  }
-
+  //Delete small masses and call conenct masses for larger ones
   void mergeMasses() {
     for (int i = 0; i < masses.size(); i++) {
       if (masses.get(i).size() < 30) {
@@ -380,6 +374,7 @@ public class Map {
     }
   }
 
+  //Dig hallway tunnels between masses usign best first search
   void connectMasses(ArrayList<int[]> small, ArrayList<int[]> main) {
     HashMap<String, String> parentMap = new HashMap<String, String>();
     ArrayList<String> neighbours = new ArrayList<String>();
@@ -427,7 +422,7 @@ public class Map {
                 parentMap.put(neighbourString, current);
               } else {
                 if (map[neighbourX][neighbourY].getType()<3 && !neighbours.contains(neighbourString) 
-                && neighbourString != current && !explored.contains(neighbourString)) {
+                  && neighbourString != current && !explored.contains(neighbourString)) {
                   neighbours.add(neighbourString); 
                   parentMap.put(neighbourString, current);
                 }
@@ -466,10 +461,7 @@ public class Map {
     mapMasses();
   }
 
-  void set(PVector point, int num) {
-    pointToCell(point).setType(num);
-  }
-
+  //Flood fill algorithm to identify reachable masses
   void flood(int x, int y, int floodNum) {
     ArrayList<int[]> mass = new ArrayList<int[]>();
     Stack<String> unfilled = new Stack<String>();
@@ -499,6 +491,7 @@ public class Map {
     masses.add(mass);
   }
 
+  //Given index, return all neigbouring cells
   ArrayList<Cell> getNeighbours(int[] index) {
     ArrayList<Cell> neighbours = new ArrayList<Cell>();
     for (int xMod = -1; xMod < 2; xMod++) {
@@ -508,7 +501,7 @@ public class Map {
           int neighbourY = index[1]+yMod;
           if (!(neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
             if (map[neighbourX][neighbourY].getType() >2 
-          && diagonalCheck(new int[]{neighbourX, neighbourY}, index)) {
+              && diagonalCheck(new int[]{neighbourX, neighbourY}, index)) {
               neighbours.add(map[neighbourX][neighbourY]);
             }
           }
@@ -518,6 +511,27 @@ public class Map {
     return neighbours;
   }
 
+  //Given an index, return a neighbours as int[]
+  ArrayList<int[]> getNeighboursIndex (int[] index) {
+    ArrayList<int[]> neighbours = new ArrayList<int[]>();
+    for (int xMod = -1; xMod < 2; xMod++) {
+      for (int yMod = -1; yMod < 2; yMod++) {
+        if (!(xMod == 0 && yMod == 0)) {
+          int neighbourX = index[0]+xMod;
+          int neighbourY = index[1]+yMod;
+          if (!(neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_SIZE || neighbourY >= MAP_SIZE)) {
+            if (map[neighbourX][neighbourY].getType() >2 
+              && diagonalCheck(new int[]{neighbourX, neighbourY}, index)) {
+              neighbours.add(new int[]{neighbourX, neighbourY});
+            }
+          }
+        }
+      }
+    }
+    return neighbours;
+  }
+
+  //Check if given a diagonal neighbour, the neighbours on either side are walls
   boolean diagonalCheck(int[] next, int[] current) {
     if (next[0] == current[0] || next[1] == current[1]) {
       return true;
@@ -538,15 +552,17 @@ public class Map {
     }
   }
 
-  public Map(boolean premake) {
-    if (premake) {
+  //Constructor
+  public Map(boolean notBoss) {
+    if (notBoss) {
       this.generate();
     } else {
-      this.initMap();
+      this.generateBoss();
     }
   }
 }
 
+//Custom comparator to compare strings
 class CustomComparator implements Comparator<String> {
   @Override
     public int compare(String a, String b) {

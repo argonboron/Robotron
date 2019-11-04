@@ -18,9 +18,11 @@ public class Cell {
   int getType() {
     return this.type;
   }
+
   int getX() {
     return this.x;
   }
+
   int getY() {
     return this.y;
   }
@@ -28,6 +30,7 @@ public class Cell {
   void setType(int type) {
     this.type = type;
   }
+  
   public Cell(int type, int x, int y, int indexX, int indexY) {
     this.type = type;
     centre = new PVector(x, y);

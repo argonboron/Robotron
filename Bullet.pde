@@ -1,24 +1,31 @@
 public class Bullet {
-  PVector position;
-  PVector velocity;
-  PVector target;
+  PVector position, velocity, target;
   final float size = 7; 
+  boolean playerSend;
 
   void display() {
-    position.add(velocity);
+    if (player.go) {
+      this.position.add(velocity);
+    }
     ellipseMode(CENTER);
-    fill(0, 80, 222);
-    ellipse(position.x, position.y, size, size);
+    if (playerSend) {
+      fill(0, 80, 222);
+    } else {
+      fill(206, 0, 0);
+    }
+    ellipse(this.position.x, this.position.y, size, size);
     fill(255);
   }
+
   PVector getPosition() {
     return this.position.copy();
   }
 
-  public Bullet(PVector start, PVector target) {
+  public Bullet(PVector start, PVector target, boolean playerSend) {
     this.position = start;
-    velocity = target.copy().sub(start);
-    velocity.normalize();
-    velocity.setMag(5);
+    this.velocity = target.copy().sub(start);
+    this.velocity.normalize();
+    this.velocity.setMag(5);
+    this.playerSend = playerSend;
   }
 }

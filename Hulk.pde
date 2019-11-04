@@ -1,14 +1,8 @@
 public class Hulk extends Robot {
   int slowTime;
 
-
   boolean display() {
-    if (slowTime > 0) {
-      if (slowTime == 1) {
-        speed = 1.7f;
-      }
-      slowTime--;
-    }
+    setGo();
     float xe = position.x, ye = position.y ;
     fill(255, 0, 0) ;
     ellipse(xe, ye, size, size) ;
@@ -22,18 +16,36 @@ public class Hulk extends Robot {
       speed = 3.6f;
       targetVel.x = xe - target.x+30;
       targetVel.y = ye - target.y+30;
+      if (slowTime > 0) {
+        if (slowTime == 1) {
+          speed = 1.7f;
+        } else {
+          speed = 0.5f;
+        }
+        slowTime--;
+      }
       integrate(targetVel) ;
       target = followPath();
     } else {
+      speed = 1.7f;
       targetVel.x = target.x - xe ;
       targetVel.y = target.y - ye ;
+
+      if (slowTime > 0) {
+        if (slowTime == 1) {
+          speed = 1.7f;
+        } else {
+          speed = 0.5f;
+        }
+        slowTime--;
+      }
       integrate(targetVel) ;
       if (path != null) {
         if (path.size()>1) {
           target = followPath();
         } else {
           while (map.pointToCell(randomTarget).getCentre() == map.pointToCell(position).getCentre()) {
-            randomTarget = map.getSpawnCell().getCentre().copy();
+            randomTarget = map.getSpawnCell(false).getCentre().copy();
           }
           target = randomTarget;
           path = getPath(target);
@@ -48,17 +60,17 @@ public class Hulk extends Robot {
     slowTime = 15;
   }
 
-
   Hulk(Cell startCell) {
     alive = true;
     slowTime = 0;
+    go = false;
     size = 19; 
     speed = 1.7f;
     velocity = new PVector(0, 0);
     position = startCell.getCentre().copy();
-    randomTarget = map.getSpawnCell().getCentre().copy();
+    randomTarget = map.getSpawnCell(false).getCentre().copy();
     while (map.pointToCell(randomTarget).getCentre() == map.pointToCell(position).getCentre()) {
-      randomTarget = map.getSpawnCell().getCentre().copy();
+      randomTarget = map.getSpawnCell(false).getCentre().copy();
     }
     acceleration = new PVector(0, 0);
     target = randomTarget;
@@ -66,7 +78,7 @@ public class Hulk extends Robot {
     if (path!=null) {
       target = path.get(0);
     } else {
-      path = getPath(map.getSpawnCell().getCentre());
+      path = getPath(map.getSpawnCell(false).getCentre());
       target = path.get(0);
     }
     targetVel = new PVector(0, 0) ;

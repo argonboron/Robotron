@@ -1,7 +1,7 @@
 public class Grunt extends Robot {
 
-
   boolean display() {
+    setGo();
     float xe = position.x, ye = position.y ;
     fill(255, 255, 0) ;
     ellipse(xe, ye, size, size) ;
@@ -16,7 +16,7 @@ public class Grunt extends Robot {
       targetVel.x = xe - target.x+30;
       targetVel.y = ye - target.y+30;
       integrate(targetVel) ;
-            target = player.getPosition();
+      target = player.getPosition();
     } else {
       targetVel.x = target.x - xe ;
       targetVel.y = target.y - ye ;
@@ -28,7 +28,7 @@ public class Grunt extends Robot {
             path = getPath(map.pointToCell(player.getPosition()).getCentre());
           }
         } else {
-          path = getPath(map.getSpawnCell().getCentre());
+          path = getPath(map.getSpawnCell(false).getCentre());
         }
         if (path != null) {
           if (path.size()>1) {
@@ -43,7 +43,7 @@ public class Grunt extends Robot {
             target = followPath();
           } else {
             while (map.pointToCell(randomTarget).getCentre() == map.pointToCell(position).getCentre()) {
-              randomTarget = map.getSpawnCell().getCentre().copy();
+              randomTarget = map.getSpawnCell(false).getCentre().copy();
             }
             target = randomTarget;
             path = getPath(target);
@@ -54,16 +54,16 @@ public class Grunt extends Robot {
     return this.alive;
   }
 
-
   Grunt(Cell startCell) {
     alive = true;
+    go = false;
     size = 18.5;
     speed = 3f;
     velocity = new PVector(0, 0);
     position = startCell.getCentre().copy();
-    randomTarget = map.getSpawnCell().getCentre().copy();
+    randomTarget = map.getSpawnCell(false).getCentre().copy();
     while (map.pointToCell(randomTarget).getCentre() == map.pointToCell(position).getCentre()) {
-      randomTarget = map.getSpawnCell().getCentre().copy();
+      randomTarget = map.getSpawnCell(false).getCentre().copy();
     }
     acceleration = new PVector(0, 0);
     hunt = (player.getPosition().dist(position)<175);
@@ -76,7 +76,7 @@ public class Grunt extends Robot {
     if (path!=null) {
       target = path.get(0);
     } else {
-      path = getPath(map.getSpawnCell().getCentre());
+      path = getPath(map.getSpawnCell(false).getCentre());
       target = path.get(0);
     }
     targetVel = new PVector(0, 0) ;

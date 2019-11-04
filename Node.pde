@@ -14,9 +14,11 @@ public class Node {
   void setCost(int cost) {
     this.cost = cost;
   }
+
   int getCost() {
     return cost;
   }
+
   void setDepth(int depth) {
     this.depth = depth;
   }
@@ -36,6 +38,7 @@ public class Node {
   int getY() {
     return this.y;
   }
+  
   Node getParent() {
     return this.parent;
   }

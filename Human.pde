@@ -1,7 +1,5 @@
 public class Human extends Being {
-  int type;
-  int state;
-  final float size = 15.7;
+  int type, state;
   PVector storedPos;
 
   void seek(PVector player) {
@@ -102,6 +100,7 @@ public class Human extends Being {
   public Human(Cell startCell, int type) {
     alive = true;
     state = 1;
+    size = 15.7;
     go = false;
     speed = 3f;
     this.type = type;

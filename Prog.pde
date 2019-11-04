@@ -56,7 +56,6 @@ public class Prog extends Robot {
     return this.alive;
   }
 
-
   Prog(Cell startCell) {
     alive = true;
     speed = 4.3f;

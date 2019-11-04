@@ -1,15 +1,8 @@
 public class Hulk extends Robot {
   int slowTime;
 
-
   boolean display() {
     setGo();
-    if (slowTime > 0) {
-      if (slowTime == 1) {
-        speed = 1.7f;
-      }
-      slowTime--;
-    }
     float xe = position.x, ye = position.y ;
     fill(255, 0, 0) ;
     ellipse(xe, ye, size, size) ;
@@ -23,12 +16,29 @@ public class Hulk extends Robot {
       speed = 3.6f;
       targetVel.x = xe - target.x+30;
       targetVel.y = ye - target.y+30;
+      if (slowTime > 0) {
+        if (slowTime == 1) {
+          speed = 1.7f;
+        } else {
+          speed = 0.5f;
+        }
+        slowTime--;
+      }
       integrate(targetVel) ;
       target = followPath();
     } else {
       speed = 1.7f;
       targetVel.x = target.x - xe ;
       targetVel.y = target.y - ye ;
+
+      if (slowTime > 0) {
+        if (slowTime == 1) {
+          speed = 1.7f;
+        } else {
+          speed = 0.5f;
+        }
+        slowTime--;
+      }
       integrate(targetVel) ;
       if (path != null) {
         if (path.size()>1) {
@@ -49,7 +59,6 @@ public class Hulk extends Robot {
     speed = 0.5f;
     slowTime = 15;
   }
-
 
   Hulk(Cell startCell) {
     alive = true;

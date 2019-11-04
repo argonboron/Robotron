@@ -10,15 +10,15 @@ public class Map {
   ArrayList<int[]> knownObstacles = new ArrayList<int[]>();
   ArrayList<int[]> spawnPositions = new ArrayList<int[]>();
   Cell[][] map;
-  int MAP_SIZE = 50;
-  int DEATH_NUM = 4;
-  int BIRTH_NUM = 4;
+  final int MAP_SIZE = 50;
+  final int DEATH_NUM = 4;
+  final int BIRTH_NUM = 4;
   boolean boss;
 
   void generate() {
     knownObstacles.clear();
     spawnPositions.clear();
-    initMap();
+    initMap(false);
     for (int i = 0; i < 10; i++) {
       step();
     }
@@ -30,6 +30,10 @@ public class Map {
     for (int i = 0; i < 5; i++) {
       step();
     }
+  }
+
+  void generateBoss() {
+    initMap(true);
   }
 
   Cell getSpawnCell(boolean playerCall) {
@@ -94,7 +98,7 @@ public class Map {
     display();
   }
 
-  void initMap() {
+  void initMap(boolean boss) {
     map = new Cell[MAP_SIZE][MAP_SIZE];
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
@@ -528,8 +532,8 @@ public class Map {
     }
     return neighbours;
   }
-  
-    ArrayList<int[]> getNeighboursIndex (int[] index) {
+
+  ArrayList<int[]> getNeighboursIndex (int[] index) {
     ArrayList<int[]> neighbours = new ArrayList<int[]>();
     for (int xMod = -1; xMod < 2; xMod++) {
       for (int yMod = -1; yMod < 2; yMod++) {
@@ -568,11 +572,11 @@ public class Map {
     }
   }
 
-  public Map(boolean premake) {
-    if (premake) {
+  public Map(boolean notBoss) {
+    if (notBoss) {
       this.generate();
     } else {
-      this.initMap();
+      this.generateBoss();
     }
   }
 }

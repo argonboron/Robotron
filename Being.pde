@@ -6,7 +6,6 @@ public abstract class Being {
   float orientation, speed, size;
   final float ORIENTATION_INCREMENT = PI/32 ;
 
-
   void integrate(PVector targetVel) {
     if (go) {
       velocity = targetVel;
@@ -220,7 +219,6 @@ public abstract class Being {
     }
   }
 
-
   PVector followPath() {
     if (map.pointToCell(position) != null) {
       if (map.pointToCell(position).getCentre() == map.pointToCell(path.get(0)).getCentre()) {
@@ -247,8 +245,6 @@ public abstract class Being {
     }
     return -1;
   }
-
-
 
   ArrayList<Node> getNodeNeighbours(Node node) {
     ArrayList<Node> neighbours = new ArrayList<Node>();

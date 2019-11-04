@@ -3,7 +3,6 @@ public class Player extends Being {
   boolean invincible, forceField, invisible, started;
 
   boolean display() {
-
     alive = lives > 0;
     velocity.add(acceleration.copy());
     collisionCheck(true);

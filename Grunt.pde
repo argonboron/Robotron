@@ -1,6 +1,5 @@
 public class Grunt extends Robot {
 
-
   boolean display() {
     setGo();
     float xe = position.x, ye = position.y ;
@@ -54,7 +53,6 @@ public class Grunt extends Robot {
     }
     return this.alive;
   }
-
 
   Grunt(Cell startCell) {
     alive = true;

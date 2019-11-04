@@ -2,7 +2,7 @@ public class Brain extends Robot {
   Cell targetCell;
 
   boolean display() {
-    setGo();
+    setGo(); //<>//
     float xe = position.x, ye = position.y ;
     fill(30, 255, 0) ;
     ellipse(xe, ye, size, size) ;
@@ -57,8 +57,7 @@ public class Brain extends Robot {
   void setTarget(Cell targetCell) {
     this.targetCell = targetCell;
   }
-
-
+  
   Brain(Cell startCell, Cell humanTargetCell) {
     alive = true;
     speed = 2.7f;

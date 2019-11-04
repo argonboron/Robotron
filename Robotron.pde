@@ -1,4 +1,4 @@
-import processing.sound.*;
+import processing.sound.*; //<>// //<>//
 
 import java.util.ArrayList;
 Map map;
@@ -12,11 +12,14 @@ ArrayList<Brain> brains;
 ArrayList<Prog> progs;
 ArrayList<Obstacle> obstacles;
 ArrayList<PowerUp> powerups;
+Boss boss;
 int count, invisibleCount, forceCount, invincibleCount, score, level, deadCount, lives, clickReadyCount;
 int gruntNum, hulkNum, humanNum, brainNum, obstacleNum, invisNum, invincibleNum, forceFieldNum;
 boolean forceField, gameOver, clickReady;
 PFont font, fontLarge;
-SoundFile background, shoot, robotdie, spawn, nextlevel, humansave, start, endscreen, prog, powerup, die;
+SoundFile background, shoot, robotdie, spawn, nextlevel, humansave, start, endscreen, prog, powerup, die, bossLoop;
+
+
 void setup() {
   font = createFont("font.ttf", 28);
   fontLarge = createFont("font.ttf", 50);
@@ -51,7 +54,7 @@ void setup() {
 }
 
 void draw() {
-  if (grunts.size()==0) {
+  if (boss== null && grunts.size()==0) {
     if (background.isPlaying()) {
       background.pause();
       nextlevel.play();
@@ -72,6 +75,15 @@ void draw() {
     forceCount--;
   }
   map.display();
+  if (boss !=null) {
+    if (!boss.display()) {
+      addScore(1000);
+      boss = null;
+      nextlevel.play();
+      delay(300);
+      nextLevel();
+    }
+  } 
   for (int i = 0; i < obstacles.size(); i++) {
     if (!obstacles.get(i).display()) {
       obstacles.remove(i);
@@ -105,7 +117,7 @@ void draw() {
   }
   for (int i = 0; i < bullets.size(); i++) {
     bullets.get(i).display();
-    if (bulletColliding(bullets.get(i).getPosition())) {
+    if (bulletColliding(bullets.get(i).getPosition(), bullets.get(i).playerSend)) {
       bullets.remove(i);
       i--;
     }
@@ -181,6 +193,7 @@ void draw() {
       progs.get(i).isHittingPlayer();
     }
   }
+  player.display();
   textFont(font);
   fill(20, 53, 163);
   text("Robotron: 4303", 19, 45);
@@ -191,9 +204,27 @@ void draw() {
   fill(227, 39, 51);
   text("lives: " + Integer.toString(lives), 19, 157);
   fill(255);
-  player.display();
+  if (boss != null) {
+    int rgb = (int) random(1, 7);
+    if (rgb ==1) {
+      fill(color(200, 0, (int)random(0, 256)));
+    } else if (rgb == 2) {
+      fill(color(200, (int)random(0, 256), 0));
+    } else if (rgb == 3) {
+      fill(color((int)random(0, 256), 0, 200));
+    } else if (rgb == 4) {
+      fill(color(0, (int)random(0, 256), 200));
+    } else if (rgb == 5) {
+      fill(color((int)random(0, 256), 200, 0));
+    } else if (rgb == 6) {
+      fill(color(0, 200, (int)random(0, 256)));
+    }
+    textFont(fontLarge);
+    text("BOSS", 390, 150);
+    fill(255);
+  }
   if (gameOver) {
-    frameRate(150);
+    frameRate(120);
     lives = 0;
     int rgb = (int) random(1, 7);
     if (rgb ==1) {
@@ -215,11 +246,11 @@ void draw() {
     fill(246, 255, 0);
     text("score: " + Integer.toString(score), 360, 550);
     fill(36, 237, 89);
-    text("level: " + Integer.toString(level), 385, 600);
+    text("level: " + Integer.toString(level), 385, 590);
     fill(252, 3, 207);
-    text("Press any button to play again!", 70, 640);
+    text("Press any button to play again!", 70, 630);
     fill(255);
-    if(clickReadyCount  == 0){
+    if (clickReadyCount  == 0) {
       clickReady = true;
     } else {
       clickReadyCount--;
@@ -229,24 +260,35 @@ void draw() {
 
 void nextLevel() {
   level++;
-  map = new Map(true);
-  if (sumNums() < 200) {
-    gruntNum++;
-    obstacleNum++;
-    if (level%3==0) {
-      hulkNum++;
-      invincibleNum++;
+  if (level%5==0) {
+    map = new Map(false);
+    background.pause();
+    bossLoop.loop();
+    spawn(true);
+  } else {
+    if (bossLoop.isPlaying()) {
+      bossLoop.stop();
     }
-    if (level%4==0) {
-      forceFieldNum++;
+    map = new Map(true);
+    if (sumNums() < 200) {
+      gruntNum++;
+      obstacleNum++;
+      if (level%3==0) {
+        hulkNum++;
+        invincibleNum++;
+      }
+      if (level%4==0) {
+        forceFieldNum++;
+      }
+      if (level%5==0) {
+        brainNum++;
+        humanNum++;
+        invisNum++;
+      }
     }
-    if (level%6==0) {
-      brainNum++;
-      invisNum++;
-    }
+    spawn(gruntNum, humanNum, hulkNum, brainNum, obstacleNum, invincibleNum, forceFieldNum, invisNum);
+    background.play();
   }
-  background.play();
-  spawn(gruntNum, humanNum, hulkNum, brainNum, obstacleNum, invincibleNum, forceFieldNum, invisNum);
 }
 
 int sumNums() {
@@ -256,10 +298,10 @@ int sumNums() {
 void resetLevel() {
   delay(300);
   die.play();
-  player.position = new PVector(-30,-30);
+  player.position = new PVector(-30, -30);
   lives--;
   if (lives > 0) {
-    spawn(gruntNum, humanNum, hulkNum, brainNum, obstacleNum, invincibleNum, forceFieldNum, invisNum);
+    spawn(grunts.size(), humans.size(), hulks.size(), brains.size(), obstacles.size(), invincibleNum, forceFieldNum, invisNum);
   } else if (!gameOver) {
     gameOver();
   }
@@ -297,13 +339,16 @@ void setupSound() {
   endscreen = new SoundFile(this, path);
   //https://freesound.org/people/Mrthenoronha/sounds/395636/
   path = sketchPath("sounds/prog.wav");
-  prog = new SoundFile(this, path);https:
+  prog = new SoundFile(this, path);
   //freesound.org/people/josepharaoh99/sounds/364929/
   path = sketchPath("sounds/die.mp3");
   die = new SoundFile(this, path);
   //freesound.org/people/ProjectsU012/sounds/360978/
   path = sketchPath("sounds/powerup.wav");
   powerup = new SoundFile(this, path);
+  //https://freesound.org/people/Sirkoto51/sounds/352171/
+  path = sketchPath("sounds/boss.wav");
+  bossLoop= new SoundFile(this, path);
 
   background.rate(1);
   background.loop();
@@ -321,7 +366,7 @@ void addScore(int add) {
   score += add;
 }
 
-boolean bulletColliding(PVector pos) {
+boolean bulletColliding(PVector pos, boolean playerSend) {
   if ((pos.x < 0 || pos.x > 1000 || pos.y < 0 || pos.y > 1000) || map.pointToCell(pos).getType() < 3) {
     return true;
   } else {
@@ -352,7 +397,6 @@ boolean bulletColliding(PVector pos) {
     for (Hulk hulk : hulks) {
       if (PVector.dist(hulk.getPosition(), pos) < (7+hulk.size)) {
         hulk.hit();
-        robotdie.play();
         return true;
       }
     }
@@ -362,6 +406,21 @@ boolean bulletColliding(PVector pos) {
         addScore(50);
         map.removeObstacle(map.pointToIndex(obstacle.getCentre()));
         return true;
+      }
+    }
+    if (boss != null) {
+      if (playerSend) {
+        if (PVector.dist(boss.getPosition(), pos) < (7+40)) {
+          boss.hit();
+          robotdie.play();
+          return true;
+        }
+      } else {        
+        if (PVector.dist(player.getPosition(), pos) < (7+16.5)) {
+          player.hit();
+          die.play();
+          return false;
+        }
       }
     }
   }
@@ -401,21 +460,18 @@ void playerColliding(PVector pos) {
 
   for (int i = 0; i < powerups.size(); i++) {
     if (powerups.get(i).getCentre().dist(pos)<18.5+1) {
-    powerup.play();
+      powerup.play();
       switch(powerups.get(i).getType()) {
       case 1:
-        //unoreverse
         invincibleCount = 350;
         player.invincible(true);
         player.invisible = false;
         break;
       case 2:
-        //force field
         forceCount = 350;
         player.forceField(true);
         break;
       case 3:
-        //invisibility
         invisibleCount = 350;
         player.invisible();
         break;
@@ -477,7 +533,7 @@ void playerColliding(PVector pos) {
     }
     for (Brain brain : brains) {
       if (PVector.dist(brain.getPosition(), pos) < (brain.size-3+18.5)) {
-        //brain.die();
+        brain.die();
         addScore(100);
       }
     }
@@ -495,6 +551,22 @@ void convertToProg(Human human) {
   progs.add(new Prog(map.pointToCell(human.getPosition())));
   prog.play();
   human.die();
+}
+
+void spawn(boolean bosslevel) {
+  grunts.clear();
+  humans.clear();
+  hulks.clear();
+  brains.clear();
+  bullets.clear();
+  progs.clear();
+  obstacles.clear();
+  powerups.clear();
+  spawn.play();
+  player = new Player(map.getSpawnCell(true));
+  if (bosslevel) {
+    boss = new Boss(level);
+  }
 }
 
 void spawn(int gruntNum, int humanNum, int hulkNum, int brainNum, int obstacleNum, int deathTouch, int forceField, int invisibility) {
@@ -570,6 +642,6 @@ void keyReleased() {
 void mousePressed() {
   if (player.go) {
     shoot.play();
-    bullets.add(new Bullet(player.getPosition(), new PVector(mouseX, mouseY)));
+    bullets.add(new Bullet(player.getPosition(), new PVector(mouseX, mouseY), true));
   }
 }

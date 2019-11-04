@@ -44,7 +44,6 @@ public class Obstacle {
     bottomLeftX = centreX-6;
     bottomLeftY = centreY+6;
     bottomRightX = centreX+6;
-    bottomRightY = centreY+6
-      ;
+    bottomRightY = centreY+6;
   }
 }

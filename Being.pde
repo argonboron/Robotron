@@ -6,6 +6,7 @@ public abstract class Being {
   float orientation, speed, size;
   final float ORIENTATION_INCREMENT = PI/32 ;
 
+  //Integrate function to update position, velocity and orientation of all beings per frame
   void integrate(PVector targetVel) {
     if (go) {
       velocity = targetVel;
@@ -45,16 +46,8 @@ public abstract class Being {
     }
   }
 
-  void die() {
-    alive = false;
-  }
-
-  PVector getPosition() {
-    return this.position.copy();
-  }
-
+  //Implementation of A* algortithm
   ArrayList<PVector> getPath(PVector target) {
-    //map.resetColours();
     this.target = target;
     ArrayList<PVector> explored = new ArrayList<PVector>();
     ArrayList<Node> frontier = new ArrayList<Node>();
@@ -76,28 +69,27 @@ public abstract class Being {
       if (found) {
         break;
       }
-      // Visit all children
+      // Visit all neighbours
       for (Node neighbour : neighbours) {
         // If unexplored
         if (!explored.contains(neighbour.getCentre())) {
           if (!(neighbour.getX()==current.getX() && neighbour.getY()==current.getY())) {
-            // Checkgoal
+            // Check goal condition
             if (neighbour.getCentre().equals(map.pointToCell(target).getCentre())) {
               goalNode = neighbour;
               found = true;
             }
             if (!nodeInFrontier(frontier, neighbour)) {
-              //Set cost
+              //Set cost for node
               neighbour.setCost(calculateCost(current, neighbour));
-              //Set heuristic
+              //Set heuristic for node
               neighbour.setHeuristic(target);
-              // Tell them their depth
+              // Set depth for Node
               neighbour.setDepth(current.getDepth() + 1);
-              // Map child to parent
+              // link child to parent
               predecessorMap.put(neighbour, current);
               neighbour.setParent(current);
               // Add to frontier
-              //map.set(neighbour.getCentre(), 6);
               frontier.add(neighbour);
             } else {
               if (calculateCost(current, neighbour) < frontier.get(indexFromFrontier(frontier, neighbour)).getCost()) {
@@ -119,17 +111,18 @@ public abstract class Being {
           }
         }
       }
-      // Add to explored
-      //map.set(current.getCentre(), 5);
+      // Add to explored (closed set)
       explored.add(current.getCentre().copy());
     }
     return makePath(target, predecessorMap, found);
   }
 
+  //Check for collisions with wall
   void collisionCheck(boolean player) {
     int[] index = map.pointToIndex(position.copy());
     int neighbours = map.countLivingNeighbours(index[0], index[1]);
     boolean hit = false;
+
     if (neighbours > 0) {
       if (map.isHittingWall(position.copy(), "up", player)) {
         hit = true;
@@ -194,6 +187,7 @@ public abstract class Being {
     }
   }
 
+  //Take output of A* and build arraylsit of PVectors for being to travel down
   ArrayList<PVector> makePath(PVector target, HashMap<Node, Node> predecessorMap, boolean found) {
     path = new ArrayList<PVector>();
     if (found) {
@@ -211,6 +205,7 @@ public abstract class Being {
     }
   }
 
+  //Set cost of node
   int calculateCost(Node current, Node neighbour) {
     if (current.getX() == neighbour.getX() || current.getY() == neighbour.getY()) {
       return 20 + current.getCost();
@@ -219,6 +214,7 @@ public abstract class Being {
     }
   }
 
+  //Give being next point of path to follow if it has reached its previous goal
   PVector followPath() {
     if (map.pointToCell(position) != null) {
       if (map.pointToCell(position).getCentre() == map.pointToCell(path.get(0)).getCentre()) {
@@ -228,6 +224,7 @@ public abstract class Being {
     return path.get(0);
   }
 
+  //Check if node is in frontier
   boolean nodeInFrontier(ArrayList<Node> frontier, Node current) {
     for (Node node : frontier) {
       if (node.getX() == current.getX() && node.getY() == current.getY()) {
@@ -237,6 +234,7 @@ public abstract class Being {
     return false;
   }
 
+  //Get the index that a node is at in the frontier
   int indexFromFrontier(ArrayList<Node> frontier, Node current) {
     for (int i = 0; i < frontier.size(); i++) {
       if (frontier.get(i).getX() == current.getX() && frontier.get(i).getY() == current.getY()) {
@@ -246,6 +244,7 @@ public abstract class Being {
     return -1;
   }
 
+  //Given a node return it's neighbours
   ArrayList<Node> getNodeNeighbours(Node node) {
     ArrayList<Node> neighbours = new ArrayList<Node>();
     ArrayList<Cell> neighbourCells = map.getNeighbours(map.pointToIndex(node.getCentre()));
@@ -260,7 +259,16 @@ public abstract class Being {
   boolean display() {
     return alive;
   }
+
+  void die() {
+    alive = false;
+  }
+
+  PVector getPosition() {
+    return this.position.copy();
+  }
 }
+//Comparator to sort nodes by F Value for A*
 class sortByFValue implements Comparator<Node> {
   public int compare(Node a, Node b) {
     int f1 = a.getFValue();

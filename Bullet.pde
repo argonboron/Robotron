@@ -4,7 +4,9 @@ public class Bullet {
   boolean playerSend;
 
   void display() {
-    this.position.add(velocity);
+    if (player.go) {
+      this.position.add(velocity);
+    }
     ellipseMode(CENTER);
     if (playerSend) {
       fill(0, 80, 222);
@@ -14,7 +16,7 @@ public class Bullet {
     ellipse(this.position.x, this.position.y, size, size);
     fill(255);
   }
-  
+
   PVector getPosition() {
     return this.position.copy();
   }

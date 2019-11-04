@@ -40,7 +40,7 @@ public class Human extends Being {
     ellipse(newxe, newye, 5.5, 5.5) ;  
     fill(255);
     if (state==1) {
-        speed = 3f;
+      speed = 3f;
       if (path != null) {
         if (path.size()>1) {
           target = followPath();
@@ -86,7 +86,9 @@ public class Human extends Being {
   void newPath() {
     if (randomTarget!=null) {
       path = getPath(randomTarget);
-      target = path.get(0);
+      if (path !=null) {
+        target = path.get(0);
+      }
       state = 1;
     } else {
       randomTarget = map.getSpawnCell(false).getCentre().copy();

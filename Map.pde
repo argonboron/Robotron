@@ -15,6 +15,7 @@ public class Map {
   final int BIRTH_NUM = 4;
   boolean boss;
 
+  //Procedural generation of game map
   void generate() {
     knownObstacles.clear();
     spawnPositions.clear();
@@ -32,10 +33,12 @@ public class Map {
     }
   }
 
+  //Generate dead map
   void generateBoss() {
     initMap(true);
   }
 
+  //Return random cell which is walkable, not already got somethign on it, and not directly next to player
   Cell getSpawnCell(boolean playerCall) {
     Cell cell = null;
     int x = 0;
@@ -57,6 +60,7 @@ public class Map {
     return cell;
   }
 
+  //Check if int[] is in an arraylist of int[]s
   public boolean isIn(ArrayList<int[]> map, int[] coords) {
     for (int[] coord : map) {
       if (Arrays.equals(coord, coords)) {
@@ -66,14 +70,17 @@ public class Map {
     return false;
   }
 
+  //add obstacles
   void addObstacle(int[] index) {
     knownObstacles.add(index);
   }
 
+  //remove obstacles
   void removeObstacle(int[] index) {
     knownObstacles.remove(index);
   }
 
+  //Apply cell laws
   void step() {
     Cell[][] newMap = new Cell[MAP_SIZE][MAP_SIZE]; 
     for (int x = 0; x < MAP_SIZE; x++) {
@@ -98,6 +105,7 @@ public class Map {
     display();
   }
 
+  //Initialise may with random dead or alive cells
   void initMap(boolean boss) {
     map = new Cell[MAP_SIZE][MAP_SIZE];
     for (int x = 0; x < MAP_SIZE; x++) {
@@ -115,6 +123,7 @@ public class Map {
     }
   }
 
+  //Given a PVector, return the cell that contains it (or nearest if on line)
   Cell pointToCell(PVector point) {
     Cell returnCell = null;
     for (int x = 0; x < MAP_SIZE; x++) {
@@ -139,6 +148,7 @@ public class Map {
     return returnCell;
   }
 
+  //Given a PVector, return the insex of the cell that ocntains it
   int[] pointToIndex(PVector point) {
     int[] returnIndex = null;
     for (int x = 0; x < MAP_SIZE; x++) {
@@ -152,7 +162,6 @@ public class Map {
     while (returnIndex == null) {
       float add  = (random(-num, num));
       num= num+8;
-
       for (int x = 0; x < MAP_SIZE; x++) {
         for (int y = 0; y < MAP_SIZE; y++) {
           if (map[x][y].isInside(point.copy().add(add, add))) {
@@ -164,6 +173,7 @@ public class Map {
     return returnIndex;
   }
 
+  //Check collisions against wall
   boolean isHittingWall(PVector point, String dir, boolean isPlayer) {
     int[] index = pointToIndex(point.copy());
     float checkSize = 0;
@@ -264,7 +274,7 @@ public class Map {
     return false;
   }
 
-
+  //Return number of neighbours that are alive
   int countLivingNeighbours(int x, int y) {
     int count = 0;
     for (int xMod = -1; xMod < 2; xMod++) {
@@ -297,9 +307,6 @@ public class Map {
         } else {
           if (map[x][y].getType()==3) {
             cell.setFill(10);
-          } else {
-            color c = getMassColour(map[x][y].getType());
-            cell.setFill(c);
           }
         }
         shape(cell);
@@ -307,16 +314,7 @@ public class Map {
     }
   }
 
-  void resetColours() {
-    for (int x = 0; x < MAP_SIZE; x++) {
-      for (int y = 0; y < MAP_SIZE; y++) {
-        if (map[x][y].getType()>3) {
-          map[x][y].setType(3);
-        }
-      }
-    }
-  }
-
+  //Use flood fill to map masses
   void mapMasses() {
     masses.clear();
     clearMasses();
@@ -331,6 +329,7 @@ public class Map {
     }
   }
 
+  //Reset mass ids
   void clearMasses() {
     for (int x = 0; x < MAP_SIZE; x++) {
       for (int y = 0; y < MAP_SIZE; y++) {
@@ -341,27 +340,7 @@ public class Map {
     }
   }
 
-  color getMassColour(int num) {
-    switch(num) {
-    case 4:
-      return color(10, 10, 50);
-    case 5:
-      return color (50, 10, 10);
-    case 6:
-      return color(10, 50, 10);
-    case 7:
-      return color (50, 50, 10);
-    case 8:
-      return color (50, 10, 50);
-    case 9:
-      return color (10, 50, 50);
-    case 10:
-      return color (50, 50, 50);
-    default:
-      return color(random(10, 60), random(10, 60), random(10, 60));
-    }
-  }
-
+  //Delete small masses and call conenct masses for larger ones
   void mergeMasses() {
     for (int i = 0; i < masses.size(); i++) {
       if (masses.get(i).size() < 30) {
@@ -395,6 +374,7 @@ public class Map {
     }
   }
 
+  //Dig hallway tunnels between masses usign best first search
   void connectMasses(ArrayList<int[]> small, ArrayList<int[]> main) {
     HashMap<String, String> parentMap = new HashMap<String, String>();
     ArrayList<String> neighbours = new ArrayList<String>();
@@ -481,10 +461,7 @@ public class Map {
     mapMasses();
   }
 
-  void set(PVector point, int num) {
-    pointToCell(point).setType(num);
-  }
-
+  //Flood fill algorithm to identify reachable masses
   void flood(int x, int y, int floodNum) {
     ArrayList<int[]> mass = new ArrayList<int[]>();
     Stack<String> unfilled = new Stack<String>();
@@ -514,6 +491,7 @@ public class Map {
     masses.add(mass);
   }
 
+  //Given index, return all neigbouring cells
   ArrayList<Cell> getNeighbours(int[] index) {
     ArrayList<Cell> neighbours = new ArrayList<Cell>();
     for (int xMod = -1; xMod < 2; xMod++) {
@@ -533,6 +511,7 @@ public class Map {
     return neighbours;
   }
 
+  //Given an index, return a neighbours as int[]
   ArrayList<int[]> getNeighboursIndex (int[] index) {
     ArrayList<int[]> neighbours = new ArrayList<int[]>();
     for (int xMod = -1; xMod < 2; xMod++) {
@@ -552,6 +531,7 @@ public class Map {
     return neighbours;
   }
 
+  //Check if given a diagonal neighbour, the neighbours on either side are walls
   boolean diagonalCheck(int[] next, int[] current) {
     if (next[0] == current[0] || next[1] == current[1]) {
       return true;
@@ -572,6 +552,7 @@ public class Map {
     }
   }
 
+  //Constructor
   public Map(boolean notBoss) {
     if (notBoss) {
       this.generate();
@@ -581,6 +562,7 @@ public class Map {
   }
 }
 
+//Custom comparator to compare strings
 class CustomComparator implements Comparator<String> {
   @Override
     public int compare(String a, String b) {

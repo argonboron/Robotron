@@ -103,13 +103,13 @@ public class Player extends Being {
     humansave.play();
     switch (type) {
     case 1:
-      addScore(100);
+      addScore(300);
       break;
     case 2:
-      addScore(150);
+      addScore(350);
       break;
     case 3:
-      addScore(200);
+      addScore(400);
       break;
     }
   }
